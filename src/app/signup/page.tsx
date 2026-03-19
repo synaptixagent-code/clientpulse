@@ -40,7 +40,7 @@ export default function SignupPage() {
             <span className="font-bold text-xl text-white">ClientPulse</span>
           </a>
           <h1 className="text-2xl font-bold text-white">Start your free trial</h1>
-          <p className="text-slate-400 text-sm mt-1">7 days free. No credit card required.</p>
+          <p className="text-slate-400 text-sm mt-1">7-day free trial. Card required to start.</p>
         </div>
 
         <form onSubmit={handleSubmit} className="bg-slate-800 p-6 rounded-2xl border border-slate-700 space-y-4">

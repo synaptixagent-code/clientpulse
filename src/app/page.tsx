@@ -131,7 +131,7 @@ function Hero() {
             See how it works
           </a>
         </div>
-        <p className="mt-4 text-sm text-slate-500">No credit card required · 7-day free trial</p>
+        <p className="mt-4 text-sm text-slate-500">7-day free trial · Card required to start</p>
         <DashboardMockup />
       </div>
     </section>
@@ -258,11 +258,11 @@ function Pricing() {
             <h3 className="font-bold text-xl mb-1 text-white">Starter</h3>
             <p className="text-slate-400 text-sm mb-6">Perfect for solo service providers.</p>
             <div className="flex items-baseline gap-1 mb-8">
-              <span className="text-5xl font-bold text-white">$29</span>
+              <span className="text-5xl font-bold text-white">$39</span>
               <span className="text-slate-500 text-lg">/mo</span>
             </div>
             <ul className="space-y-3.5 mb-8 text-sm text-slate-300 flex-1">
-              {["Unlimited intake forms", "3-step follow-up sequences", "Client dashboard", "Email notifications", "Basic analytics"].map((item) => (
+              {["Up to 50 clients", "Unlimited intake forms", "3-step follow-up sequences", "Client dashboard", "Email notifications", "Basic analytics"].map((item) => (
                 <li key={item} className="flex items-center gap-2.5">
                   <svg className="w-4 h-4 text-emerald-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
@@ -289,7 +289,7 @@ function Pricing() {
               <span className="text-blue-300 text-lg">/mo</span>
             </div>
             <ul className="space-y-3.5 mb-8 text-sm text-blue-100 flex-1">
-              {["Everything in Starter", "Unlimited follow-up sequences", "SMS follow-ups", "Custom branding", "Priority support", "API access"].map((item) => (
+              {["Up to 500 clients", "Everything in Starter", "Unlimited follow-up sequences", "SMS follow-ups", "Custom branding", "Priority support"].map((item) => (
                 <li key={item} className="flex items-center gap-2.5">
                   <svg className="w-4 h-4 text-white shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
@@ -305,7 +305,7 @@ function Pricing() {
           </div>
 
         </div>
-        <p className="text-center text-sm text-slate-500 mt-8">Both plans include a 7-day free trial · No credit card required</p>
+        <p className="text-center text-sm text-slate-500 mt-8">7-day free trial · Card required to start</p>
       </div>
     </section>
   );
@@ -327,7 +327,7 @@ function CTABanner() {
             View pricing
           </a>
         </div>
-        <p className="mt-5 text-sm text-blue-300">No credit card required · 7-day free trial · Cancel anytime</p>
+        <p className="mt-5 text-sm text-blue-300">7-day free trial · Cancel anytime</p>
       </div>
     </section>
   );

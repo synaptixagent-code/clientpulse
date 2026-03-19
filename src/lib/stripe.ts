@@ -14,8 +14,9 @@ export function getStripe(): Stripe {
 export const PLANS = {
   starter: {
     name: 'Starter',
-    price: 2900, // $29/mo in cents
+    price: 3900, // $39/mo in cents
     features: [
+      'Up to 50 clients',
       'Unlimited client intake forms',
       'Automated follow-up emails (3-step)',
       'Client dashboard',
@@ -27,12 +28,12 @@ export const PLANS = {
     name: 'Pro',
     price: 7900, // $79/mo
     features: [
+      'Up to 500 clients',
       'Everything in Starter',
       'Unlimited follow-up sequences',
       'SMS follow-ups',
       'Custom branding',
       'Priority support',
-      'API access',
     ],
   },
 } as const;
