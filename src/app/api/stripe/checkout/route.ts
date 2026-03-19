@@ -52,7 +52,8 @@ export async function POST(req: NextRequest) {
     });
 
     return NextResponse.json({ url: checkoutSession.url });
-  } catch {
+  } catch (err) {
+    console.error('[stripe-checkout-error]', String(err));
     return errorResponse(500);
   }
 }
