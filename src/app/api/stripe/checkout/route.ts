@@ -11,14 +11,17 @@ export async function POST(req: NextRequest) {
     try {
       const { allowed } = checkRateLimit(ip, 'api');
       if (!allowed) return errorResponse(429);
-    } catch { /* continue if rate limiting fails */ }
+    } catch (e) { console.error('[rl-fail]', String(e)); }
 
-    const session = await getSessionFromCookies();
+    let session = null;
+    try { session = await getSessionFromCookies(); } catch (e) { console.error('[sess-fail]', String(e)); }
+
     const body = await req.json();
     const plan = body.plan as keyof typeof PLANS;
 
     if (!plan || !PLANS[plan]) return errorResponse(400);
 
+    console.log('[checkout] plan:', plan, 'appUrl:', process.env.NEXT_PUBLIC_APP_URL);
     const stripe = getStripe();
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
 
