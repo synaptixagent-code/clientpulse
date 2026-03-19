@@ -16,78 +16,196 @@ export default function LandingPage() {
   );
 }
 
+// ─── Nav ──────────────────────────────────────────────────────────
 function Nav() {
   return (
-    <nav className="sticky top-0 z-40 bg-white/80 backdrop-blur border-b border-gray-100">
+    <nav className="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-gray-100">
       <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold text-sm">CP</div>
-          <span className="font-bold text-xl">ClientPulse</span>
+          <span className="font-bold text-xl tracking-tight">ClientPulse</span>
         </div>
-        <div className="hidden sm:flex items-center gap-6 text-sm text-gray-600">
-          <a href="#features" className="hover:text-gray-900">Features</a>
-          <a href="#pricing" className="hover:text-gray-900">Pricing</a>
-          <a href="#faq" className="hover:text-gray-900">FAQ</a>
+        <div className="hidden sm:flex items-center gap-8 text-sm text-gray-500 font-medium">
+          <a href="#features" className="hover:text-gray-900 transition">Features</a>
+          <a href="#pricing" className="hover:text-gray-900 transition">Pricing</a>
+          <a href="#faq" className="hover:text-gray-900 transition">FAQ</a>
         </div>
         <div className="flex items-center gap-3">
-          <a href="/login" className="text-sm text-gray-600 hover:text-gray-900">Log in</a>
-          <a href="/signup" className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition">Start Free Trial</a>
+          <a href="/login" className="text-sm text-gray-500 hover:text-gray-900 font-medium transition">Log in</a>
+          <a href="/signup" className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-blue-700 transition shadow-sm">
+            Start Free Trial
+          </a>
         </div>
       </div>
     </nav>
   );
 }
 
+// ─── Hero ─────────────────────────────────────────────────────────
+function DashboardMockup() {
+  return (
+    <div className="relative w-full max-w-3xl mx-auto mt-16 rounded-2xl shadow-2xl shadow-blue-100 border border-gray-200 overflow-hidden bg-white">
+      {/* Browser chrome */}
+      <div className="bg-gray-100 px-4 py-3 flex items-center gap-2 border-b border-gray-200">
+        <div className="flex gap-1.5">
+          <div className="w-3 h-3 rounded-full bg-red-400" />
+          <div className="w-3 h-3 rounded-full bg-yellow-400" />
+          <div className="w-3 h-3 rounded-full bg-green-400" />
+        </div>
+        <div className="flex-1 mx-4 bg-white rounded-md px-3 py-1 text-xs text-gray-400 border border-gray-200 text-center">
+          app.clientpulse.io/dashboard
+        </div>
+      </div>
+
+      {/* Dashboard content */}
+      <div className="p-6 bg-gray-50">
+        {/* Top stats */}
+        <div className="grid grid-cols-3 gap-4 mb-6">
+          {[
+            { label: "New Leads", value: "12", color: "text-blue-600", bg: "bg-blue-50" },
+            { label: "Follow-ups Sent", value: "34", color: "text-green-600", bg: "bg-green-50" },
+            { label: "Awaiting Reply", value: "5", color: "text-orange-500", bg: "bg-orange-50" },
+          ].map((s) => (
+            <div key={s.label} className={`${s.bg} rounded-xl p-4`}>
+              <div className={`text-2xl font-bold ${s.color}`}>{s.value}</div>
+              <div className="text-xs text-gray-500 mt-0.5">{s.label}</div>
+            </div>
+          ))}
+        </div>
+
+        {/* Leads table */}
+        <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+          <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
+            <span className="text-sm font-semibold text-gray-700">Recent Leads</span>
+            <span className="text-xs text-blue-600 font-medium cursor-pointer">View all</span>
+          </div>
+          <div className="divide-y divide-gray-50">
+            {[
+              { name: "Sarah Johnson", service: "House Cleaning", status: "Follow-up sent", dot: "bg-green-400" },
+              { name: "Mike Torres", service: "Plumbing Repair", status: "New lead", dot: "bg-blue-400" },
+              { name: "Emily Chen", service: "Tax Consulting", status: "Responded", dot: "bg-purple-400" },
+              { name: "David Park", service: "Lawn Care", status: "Follow-up sent", dot: "bg-green-400" },
+            ].map((lead) => (
+              <div key={lead.name} className="px-4 py-3 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-7 h-7 rounded-full bg-gray-200 flex items-center justify-center text-xs font-semibold text-gray-600">
+                    {lead.name.split(" ").map((n) => n[0]).join("")}
+                  </div>
+                  <div>
+                    <div className="text-sm font-medium text-gray-800">{lead.name}</div>
+                    <div className="text-xs text-gray-400">{lead.service}</div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <div className={`w-1.5 h-1.5 rounded-full ${lead.dot}`} />
+                  <span className="text-xs text-gray-500">{lead.status}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function Hero() {
   return (
-    <section className="py-20 sm:py-32">
-      <div className="max-w-4xl mx-auto px-6 text-center">
-        <div className="inline-block bg-blue-50 text-blue-700 px-3 py-1 rounded-full text-sm font-medium mb-6">
+    <section className="py-24 sm:py-32 overflow-hidden">
+      <div className="max-w-5xl mx-auto px-6 text-center">
+        <div className="inline-flex items-center gap-2 bg-blue-50 text-blue-700 px-4 py-1.5 rounded-full text-sm font-medium mb-8 border border-blue-100">
+          <span className="w-1.5 h-1.5 bg-blue-500 rounded-full" />
           Built for service businesses
         </div>
-        <h1 className="text-4xl sm:text-6xl font-bold tracking-tight leading-tight mb-6">
+        <h1 className="text-5xl sm:text-6xl font-bold tracking-tight leading-[1.1] mb-6">
           Never lose a client to
-          <span className="text-blue-600"> slow follow-up</span> again
+          <br />
+          <span className="text-blue-600">slow follow-up</span> again
         </h1>
-        <p className="text-lg sm:text-xl text-gray-600 max-w-2xl mx-auto mb-10">
+        <p className="text-lg sm:text-xl text-gray-500 max-w-2xl mx-auto mb-10 leading-relaxed">
           ClientPulse captures every lead and sends personalized follow-ups automatically.
           Set it up in 5 minutes. No CRM experience needed.
         </p>
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-          <a href="/signup" className="w-full sm:w-auto bg-blue-600 text-white px-8 py-4 rounded-xl text-lg font-semibold hover:bg-blue-700 transition shadow-lg shadow-blue-200">
-            Start Free Trial
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+          <a
+            href="/signup"
+            className="w-full sm:w-auto bg-blue-600 text-white px-8 py-3.5 rounded-xl text-base font-semibold hover:bg-blue-700 transition shadow-lg shadow-blue-200"
+          >
+            Start Free Trial →
           </a>
-          <a href="#features" className="w-full sm:w-auto text-gray-600 px-8 py-4 rounded-xl text-lg font-medium hover:bg-gray-50 transition border border-gray-200">
+          <a
+            href="#features"
+            className="w-full sm:w-auto text-gray-500 px-8 py-3.5 rounded-xl text-base font-medium hover:text-gray-900 hover:bg-gray-50 transition border border-gray-200"
+          >
             See how it works
           </a>
         </div>
-        <p className="mt-4 text-sm text-gray-400">No credit card required. 14-day free trial.</p>
+        <p className="mt-4 text-sm text-gray-400">No credit card required · 7-day free trial</p>
+        <DashboardMockup />
       </div>
     </section>
   );
 }
 
+// ─── Features ─────────────────────────────────────────────────────
+const featureIcons: Record<string, React.ReactNode> = {
+  intake: (
+    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+    </svg>
+  ),
+  followup: (
+    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+    </svg>
+  ),
+  dashboard: (
+    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+    </svg>
+  ),
+  security: (
+    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+    </svg>
+  ),
+  setup: (
+    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+    </svg>
+  ),
+  pricing: (
+    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+    </svg>
+  ),
+};
+
 function Features() {
   const features = [
-    { icon: "📋", title: "Smart Intake Forms", desc: "Customizable forms that capture exactly what you need. Embed on your website or share a link." },
-    { icon: "🔄", title: "Auto Follow-Ups", desc: "Set up email sequences that go out automatically. Day 1, Day 3, Day 7 — you choose the timing." },
-    { icon: "📊", title: "Simple Dashboard", desc: "See all your leads in one place. Track who's been contacted, who responded, who needs attention." },
-    { icon: "🔒", title: "Enterprise Security", desc: "AES-256 encryption, OWASP-compliant, GDPR ready. Your client data is protected to bank-grade standards." },
-    { icon: "⚡", title: "5-Minute Setup", desc: "No IT team needed. Sign up, customize your form, share the link. You're live in minutes." },
-    { icon: "💳", title: "Affordable Pricing", desc: "One simple price. No per-contact fees, no surprise charges. Cancel anytime." },
+    { iconKey: "intake", title: "Smart Intake Forms", desc: "Customizable forms that capture exactly what you need. Embed on your website or share a link — no coding required.", color: "text-blue-600 bg-blue-50" },
+    { iconKey: "followup", title: "Auto Follow-Ups", desc: "Set up email sequences that go out automatically. Day 1, Day 3, Day 7 — you choose the timing and message.", color: "text-violet-600 bg-violet-50" },
+    { iconKey: "dashboard", title: "Simple Dashboard", desc: "See all your leads in one place. Track who's been contacted, who responded, and who needs attention.", color: "text-emerald-600 bg-emerald-50" },
+    { iconKey: "security", title: "Enterprise Security", desc: "AES-256 encryption, OWASP-compliant, GDPR ready. Your client data is protected to bank-grade standards.", color: "text-orange-600 bg-orange-50" },
+    { iconKey: "setup", title: "5-Minute Setup", desc: "No IT team needed. Sign up, customize your form, share the link. You're live in minutes.", color: "text-rose-600 bg-rose-50" },
+    { iconKey: "pricing", title: "Affordable Pricing", desc: "One simple price. No per-contact fees, no surprise charges. Cancel anytime — no questions asked.", color: "text-teal-600 bg-teal-50" },
   ];
 
   return (
-    <section id="features" className="py-20 bg-gray-50">
+    <section id="features" className="py-24 bg-gray-50/70">
       <div className="max-w-6xl mx-auto px-6">
-        <h2 className="text-3xl sm:text-4xl font-bold text-center mb-4">Everything you need to convert leads</h2>
-        <p className="text-gray-600 text-center mb-16 max-w-2xl mx-auto">Stop losing clients to forgotten follow-ups. ClientPulse handles it all.</p>
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
-          {features.map((f, i) => (
-            <div key={i} className="bg-white p-6 rounded-xl border border-gray-100 hover:shadow-md transition">
-              <div className="text-3xl mb-4">{f.icon}</div>
-              <h3 className="font-semibold text-lg mb-2">{f.title}</h3>
-              <p className="text-gray-600 text-sm leading-relaxed">{f.desc}</p>
+        <div className="text-center mb-16">
+          <h2 className="text-3xl sm:text-4xl font-bold mb-4">Everything you need to convert leads</h2>
+          <p className="text-gray-500 max-w-xl mx-auto text-lg">Stop losing clients to forgotten follow-ups. ClientPulse handles it all.</p>
+        </div>
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {features.map((f) => (
+            <div key={f.iconKey} className="bg-white p-7 rounded-2xl border border-gray-100 hover:shadow-lg hover:shadow-gray-100 hover:-translate-y-0.5 transition-all duration-200">
+              <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-5 ${f.color}`}>
+                {featureIcons[f.iconKey]}
+              </div>
+              <h3 className="font-semibold text-lg mb-2 text-gray-900">{f.title}</h3>
+              <p className="text-gray-500 text-sm leading-relaxed">{f.desc}</p>
             </div>
           ))}
         </div>
@@ -96,34 +214,45 @@ function Features() {
   );
 }
 
+// ─── How It Works ──────────────────────────────────────────────────
 function HowItWorks() {
   const steps = [
-    { num: "1", title: "Create your intake form", desc: "Choose what info you need from clients. Name, email, phone, service type — fully customizable." },
-    { num: "2", title: "Share the link", desc: "Embed on your website, share on social media, or text it to prospects. Works everywhere." },
-    { num: "3", title: "Leads come in automatically", desc: "Every submission lands in your dashboard. You get notified instantly." },
+    { num: "1", title: "Create your intake form", desc: "Choose what info you need from clients — name, email, phone, service type. Fully customizable in minutes." },
+    { num: "2", title: "Share the link", desc: "Embed on your website, share on social media, or text it to prospects. Works on any device." },
+    { num: "3", title: "Leads come in automatically", desc: "Every submission lands in your dashboard instantly. You get notified the moment someone fills out your form." },
     { num: "4", title: "Follow-ups go out on autopilot", desc: "Personalized emails send at the intervals you choose. Clients feel cared for without you lifting a finger." },
   ];
 
   return (
-    <section className="py-20">
+    <section className="py-24">
       <div className="max-w-4xl mx-auto px-6">
-        <h2 className="text-3xl sm:text-4xl font-bold text-center mb-16">How it works</h2>
-        <div className="space-y-12">
-          {steps.map((s, i) => (
-            <div key={i} className="flex gap-6 items-start">
-              <div className="w-12 h-12 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold text-lg shrink-0">{s.num}</div>
-              <div>
-                <h3 className="font-semibold text-lg mb-1">{s.title}</h3>
-                <p className="text-gray-600">{s.desc}</p>
+        <div className="text-center mb-16">
+          <h2 className="text-3xl sm:text-4xl font-bold mb-4">How it works</h2>
+          <p className="text-gray-500 text-lg">Up and running in under 5 minutes.</p>
+        </div>
+        <div className="relative">
+          {/* Vertical connector line */}
+          <div className="absolute left-6 top-6 bottom-6 w-px bg-gray-100 hidden sm:block" />
+          <div className="space-y-10">
+            {steps.map((s, i) => (
+              <div key={i} className="flex gap-6 items-start relative">
+                <div className="w-12 h-12 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold text-lg shrink-0 z-10 shadow-lg shadow-blue-100">
+                  {s.num}
+                </div>
+                <div className="bg-white border border-gray-100 rounded-2xl p-6 flex-1 hover:shadow-md transition">
+                  <h3 className="font-semibold text-lg mb-1.5 text-gray-900">{s.title}</h3>
+                  <p className="text-gray-500 leading-relaxed">{s.desc}</p>
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </div>
     </section>
   );
 }
 
+// ─── Pricing ──────────────────────────────────────────────────────
 function Pricing() {
   const [loading, setLoading] = useState<string | null>(null);
 
@@ -144,87 +273,112 @@ function Pricing() {
   }
 
   return (
-    <section id="pricing" className="py-20 bg-gray-50">
+    <section id="pricing" className="py-24 bg-gray-50/70">
       <div className="max-w-5xl mx-auto px-6">
-        <h2 className="text-3xl sm:text-4xl font-bold text-center mb-4">Simple, honest pricing</h2>
-        <p className="text-gray-600 text-center mb-16">No hidden fees. No contracts. Cancel anytime.</p>
-        <div className="grid sm:grid-cols-2 gap-8 max-w-3xl mx-auto">
+        <div className="text-center mb-16">
+          <h2 className="text-3xl sm:text-4xl font-bold mb-4">Simple, honest pricing</h2>
+          <p className="text-gray-500 text-lg">No hidden fees. No contracts. Cancel anytime.</p>
+        </div>
+        <div className="grid sm:grid-cols-2 gap-6 max-w-3xl mx-auto">
           {/* Starter */}
-          <div className="bg-white rounded-2xl border-2 border-gray-100 p-8 hover:border-blue-200 transition">
-            <h3 className="font-bold text-lg mb-1">Starter</h3>
-            <div className="flex items-baseline gap-1 mb-4">
-              <span className="text-4xl font-bold">$29</span>
-              <span className="text-gray-500">/mo</span>
+          <div className="bg-white rounded-2xl border border-gray-200 p-8 hover:border-gray-300 transition">
+            <h3 className="font-bold text-xl mb-1 text-gray-900">Starter</h3>
+            <p className="text-gray-500 text-sm mb-6">Perfect for solo service providers.</p>
+            <div className="flex items-baseline gap-1 mb-8">
+              <span className="text-5xl font-bold text-gray-900">$29</span>
+              <span className="text-gray-400 text-lg">/mo</span>
             </div>
-            <ul className="space-y-3 mb-8 text-sm text-gray-600">
-              <li className="flex gap-2"><span className="text-green-500">&#10003;</span> Unlimited intake forms</li>
-              <li className="flex gap-2"><span className="text-green-500">&#10003;</span> 3-step follow-up sequences</li>
-              <li className="flex gap-2"><span className="text-green-500">&#10003;</span> Client dashboard</li>
-              <li className="flex gap-2"><span className="text-green-500">&#10003;</span> Email notifications</li>
-              <li className="flex gap-2"><span className="text-green-500">&#10003;</span> Basic analytics</li>
+            <ul className="space-y-3.5 mb-8 text-sm text-gray-600">
+              {["Unlimited intake forms", "3-step follow-up sequences", "Client dashboard", "Email notifications", "Basic analytics"].map((item) => (
+                <li key={item} className="flex items-center gap-2.5">
+                  <svg className="w-4 h-4 text-green-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                  </svg>
+                  {item}
+                </li>
+              ))}
             </ul>
             <button
               onClick={() => handleCheckout("starter")}
               disabled={loading === "starter"}
-              className="w-full bg-blue-600 text-white py-3 rounded-lg font-medium hover:bg-blue-700 transition disabled:opacity-50"
+              className="w-full bg-gray-900 text-white py-3 rounded-xl font-semibold hover:bg-gray-800 transition disabled:opacity-50 text-sm"
             >
               {loading === "starter" ? "Loading..." : "Get Started"}
             </button>
           </div>
 
           {/* Pro */}
-          <div className="bg-white rounded-2xl border-2 border-blue-600 p-8 relative">
-            <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-blue-600 text-white text-xs font-bold px-3 py-1 rounded-full">POPULAR</div>
-            <h3 className="font-bold text-lg mb-1">Pro</h3>
-            <div className="flex items-baseline gap-1 mb-4">
-              <span className="text-4xl font-bold">$79</span>
-              <span className="text-gray-500">/mo</span>
+          <div className="bg-blue-600 rounded-2xl p-8 relative text-white shadow-xl shadow-blue-200">
+            <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-white text-blue-600 text-xs font-bold px-4 py-1.5 rounded-full border border-blue-100 shadow-sm">
+              MOST POPULAR
             </div>
-            <ul className="space-y-3 mb-8 text-sm text-gray-600">
-              <li className="flex gap-2"><span className="text-green-500">&#10003;</span> Everything in Starter</li>
-              <li className="flex gap-2"><span className="text-green-500">&#10003;</span> Unlimited follow-up sequences</li>
-              <li className="flex gap-2"><span className="text-green-500">&#10003;</span> SMS follow-ups</li>
-              <li className="flex gap-2"><span className="text-green-500">&#10003;</span> Custom branding</li>
-              <li className="flex gap-2"><span className="text-green-500">&#10003;</span> Priority support</li>
-              <li className="flex gap-2"><span className="text-green-500">&#10003;</span> API access</li>
+            <h3 className="font-bold text-xl mb-1">Pro</h3>
+            <p className="text-blue-200 text-sm mb-6">For growing service businesses.</p>
+            <div className="flex items-baseline gap-1 mb-8">
+              <span className="text-5xl font-bold">$79</span>
+              <span className="text-blue-300 text-lg">/mo</span>
+            </div>
+            <ul className="space-y-3.5 mb-8 text-sm text-blue-100">
+              {["Everything in Starter", "Unlimited follow-up sequences", "SMS follow-ups", "Custom branding", "Priority support", "API access"].map((item) => (
+                <li key={item} className="flex items-center gap-2.5">
+                  <svg className="w-4 h-4 text-white shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                  </svg>
+                  {item}
+                </li>
+              ))}
             </ul>
             <button
               onClick={() => handleCheckout("pro")}
               disabled={loading === "pro"}
-              className="w-full bg-blue-600 text-white py-3 rounded-lg font-medium hover:bg-blue-700 transition disabled:opacity-50"
+              className="w-full bg-white text-blue-600 py-3 rounded-xl font-semibold hover:bg-blue-50 transition disabled:opacity-50 text-sm shadow-sm"
             >
               {loading === "pro" ? "Loading..." : "Get Started"}
             </button>
           </div>
         </div>
+        <p className="text-center text-sm text-gray-400 mt-8">Both plans include a 7-day free trial · No credit card required</p>
       </div>
     </section>
   );
 }
 
+// ─── FAQ ──────────────────────────────────────────────────────────
 function FAQ() {
+  const [open, setOpen] = useState<number | null>(null);
+
   const faqs = [
     { q: "How long does setup take?", a: "About 5 minutes. Sign up, customize your form, and share the link. No technical skills needed." },
-    { q: "Can I try it before paying?", a: "Yes! We offer a 14-day free trial with full access. No credit card required to start." },
+    { q: "Can I try it before paying?", a: "Yes! We offer a 7-day free trial with full access to all features. No credit card required to start." },
     { q: "Is my client data secure?", a: "Absolutely. We use AES-256 encryption, follow OWASP security standards, and are GDPR compliant. Your data is protected to enterprise standards." },
-    { q: "Can I cancel anytime?", a: "Yes. No contracts, no cancellation fees. You can cancel your subscription at any time from your dashboard." },
-    { q: "Do you offer refunds?", a: "We offer a 30-day money-back guarantee. If you're not satisfied, contact us for a full refund." },
+    { q: "Can I cancel anytime?", a: "Yes. No contracts, no cancellation fees. Cancel your subscription at any time directly from your dashboard." },
+    { q: "Do you offer refunds?", a: "We offer a 30-day money-back guarantee. If you're not satisfied, contact us for a full refund — no questions asked." },
     { q: "What kinds of businesses use ClientPulse?", a: "Plumbers, electricians, cleaners, consultants, contractors, therapists, tutors — any service business that takes client inquiries." },
   ];
 
   return (
-    <section id="faq" className="py-20">
-      <div className="max-w-3xl mx-auto px-6">
-        <h2 className="text-3xl sm:text-4xl font-bold text-center mb-16">Frequently asked questions</h2>
-        <div className="space-y-6">
+    <section id="faq" className="py-24">
+      <div className="max-w-2xl mx-auto px-6">
+        <div className="text-center mb-16">
+          <h2 className="text-3xl sm:text-4xl font-bold mb-4">Frequently asked questions</h2>
+          <p className="text-gray-500 text-lg">Can't find the answer? <a href="mailto:hello@clientpulse.io" className="text-blue-600 hover:underline">Email us.</a></p>
+        </div>
+        <div className="space-y-3">
           {faqs.map((f, i) => (
-            <details key={i} className="group border-b border-gray-200 pb-6">
-              <summary className="font-medium cursor-pointer flex justify-between items-center list-none">
-                {f.q}
-                <span className="text-gray-400 group-open:rotate-45 transition-transform text-xl">+</span>
-              </summary>
-              <p className="mt-3 text-gray-600 text-sm leading-relaxed">{f.a}</p>
-            </details>
+            <div key={i} className="border border-gray-200 rounded-xl overflow-hidden">
+              <button
+                onClick={() => setOpen(open === i ? null : i)}
+                className="w-full px-6 py-4 flex justify-between items-center text-left hover:bg-gray-50 transition"
+              >
+                <span className="font-medium text-gray-900">{f.q}</span>
+                <span className={`text-gray-400 text-lg transition-transform duration-200 ml-4 shrink-0 ${open === i ? "rotate-45" : ""}`}>+</span>
+              </button>
+              {open === i && (
+                <div className="px-6 pb-5 text-gray-500 text-sm leading-relaxed border-t border-gray-100 pt-4">
+                  {f.a}
+                </div>
+              )}
+            </div>
           ))}
         </div>
       </div>
@@ -232,38 +386,54 @@ function FAQ() {
   );
 }
 
+// ─── Footer ───────────────────────────────────────────────────────
 function Footer() {
   return (
-    <footer className="bg-gray-900 text-gray-400 py-12">
-      <div className="max-w-6xl mx-auto px-6">
-        <div className="flex flex-col sm:flex-row justify-between gap-8">
-          <div>
-            <div className="flex items-center gap-2 mb-3">
+    <footer className="bg-gray-950 text-gray-500">
+      <div className="max-w-6xl mx-auto px-6 py-16">
+        <div className="grid sm:grid-cols-4 gap-10 pb-12 border-b border-gray-800">
+          {/* Brand */}
+          <div className="sm:col-span-2">
+            <div className="flex items-center gap-2 mb-4">
               <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold text-sm">CP</div>
               <span className="font-bold text-lg text-white">ClientPulse</span>
             </div>
-            <p className="text-sm max-w-xs">Client intake and follow-up automation for service businesses.</p>
+            <p className="text-sm leading-relaxed max-w-xs mb-6">
+              Client intake and follow-up automation for service businesses. Never lose a lead again.
+            </p>
+            <a
+              href="/signup"
+              className="inline-flex items-center gap-2 bg-blue-600 text-white px-5 py-2.5 rounded-lg text-sm font-semibold hover:bg-blue-700 transition"
+            >
+              Start Free Trial →
+            </a>
           </div>
-          <div className="flex gap-12 text-sm">
-            <div>
-              <h4 className="text-white font-medium mb-3">Product</h4>
-              <ul className="space-y-2">
-                <li><a href="#features" className="hover:text-white">Features</a></li>
-                <li><a href="#pricing" className="hover:text-white">Pricing</a></li>
-                <li><a href="#faq" className="hover:text-white">FAQ</a></li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="text-white font-medium mb-3">Legal</h4>
-              <ul className="space-y-2">
-                <li><a href="/terms" className="hover:text-white">Terms of Service</a></li>
-                <li><a href="/privacy" className="hover:text-white">Privacy Policy</a></li>
-              </ul>
-            </div>
+
+          {/* Product */}
+          <div>
+            <h4 className="text-white font-semibold mb-4 text-sm">Product</h4>
+            <ul className="space-y-3 text-sm">
+              <li><a href="#features" className="hover:text-white transition">Features</a></li>
+              <li><a href="#pricing" className="hover:text-white transition">Pricing</a></li>
+              <li><a href="#faq" className="hover:text-white transition">FAQ</a></li>
+              <li><a href="/signup" className="hover:text-white transition">Sign Up</a></li>
+            </ul>
+          </div>
+
+          {/* Legal */}
+          <div>
+            <h4 className="text-white font-semibold mb-4 text-sm">Company</h4>
+            <ul className="space-y-3 text-sm">
+              <li><a href="/terms" className="hover:text-white transition">Terms of Service</a></li>
+              <li><a href="/privacy" className="hover:text-white transition">Privacy Policy</a></li>
+              <li><a href="mailto:hello@clientpulse.io" className="hover:text-white transition">Contact</a></li>
+            </ul>
           </div>
         </div>
-        <div className="mt-12 pt-6 border-t border-gray-800 text-xs">
-          &copy; {new Date().getFullYear()} ClientPulse. All rights reserved.
+
+        <div className="pt-8 flex flex-col sm:flex-row justify-between items-center gap-4">
+          <p className="text-xs">&copy; {new Date().getFullYear()} ClientPulse. All rights reserved.</p>
+          <p className="text-xs">Early access · <a href="/signup" className="text-blue-500 hover:text-blue-400">Join today</a></p>
         </div>
       </div>
     </footer>

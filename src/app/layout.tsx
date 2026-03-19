@@ -15,16 +15,14 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         {children}
-        <div id="cookie-consent" className="fixed bottom-0 left-0 right-0 bg-gray-900 text-white p-4 z-50 hidden">
-          <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-            <p className="text-sm">
-              We use essential cookies for authentication. See our{" "}
-              <a href="/privacy" className="underline">Privacy Policy</a>.
-            </p>
-            <div className="flex gap-2">
-              <button id="cookie-accept" className="bg-white text-gray-900 px-4 py-2 rounded text-sm font-medium hover:bg-gray-200">Accept</button>
-              <button id="cookie-decline" className="border border-white px-4 py-2 rounded text-sm hover:bg-gray-800">Decline</button>
-            </div>
+        <div id="cookie-consent" className="fixed bottom-4 right-4 z-50 hidden max-w-sm bg-white border border-gray-200 rounded-2xl shadow-xl p-4">
+          <p className="text-sm text-gray-600 mb-3">
+            We use essential cookies for authentication. See our{" "}
+            <a href="/privacy" className="text-blue-600 hover:underline">Privacy Policy</a>.
+          </p>
+          <div className="flex gap-2">
+            <button id="cookie-accept" className="flex-1 bg-blue-600 text-white px-3 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition">Accept</button>
+            <button id="cookie-decline" className="flex-1 border border-gray-200 text-gray-600 px-3 py-2 rounded-lg text-sm hover:bg-gray-50 transition">Decline</button>
           </div>
         </div>
         <script dangerouslySetInnerHTML={{ __html: `
