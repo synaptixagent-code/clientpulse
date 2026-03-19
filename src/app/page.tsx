@@ -345,7 +345,7 @@ function Pricing() {
 
 // ─── FAQ ──────────────────────────────────────────────────────────
 function FAQ() {
-  const [open, setOpen] = useState<number | null>(null);
+  const [open, setOpen] = useState<number | null>(0);
 
   const faqs = [
     { q: "How long does setup take?", a: "About 5 minutes. Sign up, customize your form, and share the link. No technical skills needed." },
@@ -357,29 +357,66 @@ function FAQ() {
   ];
 
   return (
-    <section id="faq" className="py-24">
-      <div className="max-w-2xl mx-auto px-6">
-        <div className="text-center mb-16">
-          <h2 className="text-3xl sm:text-4xl font-bold mb-4">Frequently asked questions</h2>
-          <p className="text-gray-500 text-lg">Can't find the answer? <a href="mailto:hello@clientpulse.io" className="text-blue-600 hover:underline">Email us.</a></p>
-        </div>
-        <div className="space-y-3">
-          {faqs.map((f, i) => (
-            <div key={i} className="border border-gray-200 rounded-xl overflow-hidden">
-              <button
-                onClick={() => setOpen(open === i ? null : i)}
-                className="w-full px-6 py-4 flex justify-between items-center text-left hover:bg-gray-50 transition"
-              >
-                <span className="font-medium text-gray-900">{f.q}</span>
-                <span className={`text-gray-400 text-lg transition-transform duration-200 ml-4 shrink-0 ${open === i ? "rotate-45" : ""}`}>+</span>
-              </button>
-              {open === i && (
-                <div className="px-6 pb-5 text-gray-500 text-sm leading-relaxed border-t border-gray-100 pt-4">
-                  {f.a}
-                </div>
-              )}
+    <section id="faq" className="py-24 bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900">
+      <div className="max-w-6xl mx-auto px-6">
+        <div className="grid lg:grid-cols-5 gap-16 items-start">
+
+          {/* Left — sticky label */}
+          <div className="lg:col-span-2 lg:sticky lg:top-28">
+            <div className="inline-flex items-center gap-2 bg-blue-500/20 text-blue-300 px-3 py-1 rounded-full text-sm font-medium mb-6 border border-blue-500/30">
+              <span className="w-1.5 h-1.5 bg-blue-400 rounded-full" />
+              FAQ
             </div>
-          ))}
+            <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4 leading-tight">
+              Got questions?<br />We've got answers.
+            </h2>
+            <p className="text-slate-400 leading-relaxed mb-8">
+              Everything you need to know about ClientPulse. Can't find what you're looking for?
+            </p>
+            <a
+              href="mailto:hello@clientpulse.io"
+              className="inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white border border-white/20 px-5 py-2.5 rounded-xl text-sm font-medium transition"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+              </svg>
+              Email us
+            </a>
+          </div>
+
+          {/* Right — accordion */}
+          <div className="lg:col-span-3 space-y-3">
+            {faqs.map((f, i) => (
+              <div
+                key={i}
+                className={`rounded-2xl border transition-all duration-200 overflow-hidden ${
+                  open === i
+                    ? "bg-white/10 border-blue-400/50"
+                    : "bg-white/5 border-white/10 hover:bg-white/8 hover:border-white/20"
+                }`}
+              >
+                <button
+                  onClick={() => setOpen(open === i ? null : i)}
+                  className="w-full px-6 py-5 flex justify-between items-center text-left gap-4"
+                >
+                  <span className={`font-semibold text-base transition-colors ${open === i ? "text-white" : "text-slate-300"}`}>
+                    {f.q}
+                  </span>
+                  <span className={`shrink-0 w-7 h-7 rounded-full flex items-center justify-center transition-all duration-200 text-sm font-bold ${
+                    open === i ? "bg-blue-500 text-white rotate-45" : "bg-white/10 text-slate-400"
+                  }`}>
+                    +
+                  </span>
+                </button>
+                {open === i && (
+                  <div className="px-6 pb-5 text-slate-300 text-sm leading-relaxed border-t border-white/10 pt-4">
+                    {f.a}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+
         </div>
       </div>
     </section>
