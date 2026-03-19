@@ -20,20 +20,20 @@ export default function LandingPage() {
 // ─── Nav ──────────────────────────────────────────────────────────
 function Nav() {
   return (
-    <nav className="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-gray-100">
+    <nav className="sticky top-0 z-40 bg-slate-900/95 backdrop-blur-md border-b border-white/10">
       <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
         <a href="/" className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold text-sm">CP</div>
-          <span className="font-bold text-xl tracking-tight">ClientPulse</span>
+          <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center text-white font-bold text-sm">CP</div>
+          <span className="font-bold text-xl tracking-tight text-white">ClientPulse</span>
         </a>
-        <div className="hidden sm:flex items-center gap-8 text-sm text-gray-500 font-medium">
-          <a href="#features" className="hover:text-gray-900 transition">Features</a>
-          <a href="#pricing" className="hover:text-gray-900 transition">Pricing</a>
-          <a href="#faq" className="hover:text-gray-900 transition">FAQ</a>
+        <div className="hidden sm:flex items-center gap-8 text-sm text-slate-400 font-medium">
+          <a href="#features" className="hover:text-white transition">Features</a>
+          <a href="#pricing" className="hover:text-white transition">Pricing</a>
+          <a href="#faq" className="hover:text-white transition">FAQ</a>
         </div>
         <div className="flex items-center gap-3">
-          <a href="/login" className="text-sm text-gray-500 hover:text-gray-900 font-medium transition">Log in</a>
-          <a href="/signup" className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-blue-700 transition shadow-sm">
+          <a href="/login" className="text-sm text-slate-400 hover:text-white font-medium transition">Log in</a>
+          <a href="/signup" className="bg-blue-500 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-blue-400 transition shadow-sm">
             Start Free Trial
           </a>
         </div>
@@ -45,7 +45,7 @@ function Nav() {
 // ─── Hero ─────────────────────────────────────────────────────────
 function DashboardMockup() {
   return (
-    <div className="relative w-full max-w-3xl mx-auto mt-14 rounded-2xl shadow-2xl shadow-blue-200/60 border border-gray-200 overflow-hidden bg-white">
+    <div className="relative w-full max-w-3xl mx-auto mt-14 rounded-2xl shadow-2xl shadow-black/40 border border-white/10 overflow-hidden bg-white">
       {/* Browser chrome */}
       <div className="bg-gray-100 px-4 py-3 flex items-center gap-2 border-b border-gray-200">
         <div className="flex gap-1.5">
@@ -108,38 +108,43 @@ function DashboardMockup() {
 
 function Hero() {
   return (
-    <section className="relative py-24 sm:py-32 overflow-hidden bg-gradient-to-b from-blue-50/60 via-white to-white">
-      {/* Subtle radial glow behind mockup */}
-      <div className="absolute inset-x-0 top-0 h-full bg-[radial-gradient(ellipse_80%_50%_at_50%_-10%,rgba(59,130,246,0.12),transparent)] pointer-events-none" />
+    <section className="relative py-24 sm:py-32 overflow-hidden bg-slate-900">
+      {/* Background grid pattern */}
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.03)_1px,transparent_1px)] bg-[size:64px_64px] pointer-events-none" />
+      {/* Blue radial glow */}
+      <div className="absolute inset-x-0 top-0 h-full bg-[radial-gradient(ellipse_80%_60%_at_50%_-20%,rgba(59,130,246,0.25),transparent)] pointer-events-none" />
+      {/* Bottom fade to white */}
+      <div className="absolute bottom-0 inset-x-0 h-40 bg-gradient-to-t from-white to-transparent pointer-events-none" />
+
       <div className="relative max-w-5xl mx-auto px-6 text-center">
-        <div className="inline-flex items-center gap-2 bg-blue-50 text-blue-700 px-4 py-1.5 rounded-full text-sm font-medium mb-8 border border-blue-100">
-          <span className="w-1.5 h-1.5 bg-blue-500 rounded-full" />
+        <div className="inline-flex items-center gap-2 bg-blue-500/15 text-blue-300 px-4 py-1.5 rounded-full text-sm font-medium mb-8 border border-blue-500/30">
+          <span className="w-1.5 h-1.5 bg-blue-400 rounded-full" />
           Built for service businesses
         </div>
-        <h1 className="text-5xl sm:text-6xl font-bold tracking-tight leading-[1.1] mb-6">
+        <h1 className="text-5xl sm:text-6xl font-bold tracking-tight leading-[1.1] mb-6 text-white">
           Never lose a client to
           <br />
-          <span className="text-blue-600">slow follow-up</span> again
+          <span className="text-blue-400">slow follow-up</span> again
         </h1>
-        <p className="text-lg sm:text-xl text-gray-500 max-w-2xl mx-auto mb-10 leading-relaxed">
+        <p className="text-lg sm:text-xl text-slate-400 max-w-2xl mx-auto mb-10 leading-relaxed">
           ClientPulse captures every lead and sends personalized follow-ups automatically.
           Set it up in 5 minutes. No CRM experience needed.
         </p>
         <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
           <a
             href="/signup"
-            className="w-full sm:w-auto bg-blue-600 text-white px-8 py-3.5 rounded-xl text-base font-semibold hover:bg-blue-700 transition shadow-lg shadow-blue-200"
+            className="w-full sm:w-auto bg-white text-slate-900 px-8 py-3.5 rounded-xl text-base font-semibold hover:bg-blue-50 transition shadow-xl shadow-black/20"
           >
             Start Free Trial →
           </a>
           <a
             href="#features"
-            className="w-full sm:w-auto text-gray-500 px-8 py-3.5 rounded-xl text-base font-medium hover:text-gray-900 hover:bg-gray-50 transition border border-gray-200"
+            className="w-full sm:w-auto text-slate-300 px-8 py-3.5 rounded-xl text-base font-medium hover:text-white hover:bg-white/10 transition border border-white/20"
           >
             See how it works
           </a>
         </div>
-        <p className="mt-4 text-sm text-gray-400">No credit card required · 7-day free trial</p>
+        <p className="mt-4 text-sm text-slate-500">No credit card required · 7-day free trial</p>
         <DashboardMockup />
       </div>
     </section>
