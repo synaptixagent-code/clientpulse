@@ -1,68 +1,64 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getStripe, PLANS } from '@/lib/stripe';
+import { PLANS } from '@/lib/stripe';
 import { getSessionFromCookies } from '@/lib/auth';
-import { checkRateLimit, getClientIp, auditLog, errorResponse } from '@/lib/security';
+import { checkRateLimit, getClientIp, errorResponse } from '@/lib/security';
 
 export async function POST(req: NextRequest) {
   try {
     const ip = getClientIp(req);
 
-    // Rate limiting — non-fatal if SQLite unavailable
     try {
       const { allowed } = checkRateLimit(ip, 'api');
       if (!allowed) return errorResponse(429);
-    } catch (e) { console.error('[rl-fail]', String(e)); }
+    } catch { /* non-fatal */ }
 
     let session = null;
-    try { session = await getSessionFromCookies(); } catch (e) { console.error('[sess-fail]', String(e)); }
+    try { session = await getSessionFromCookies(); } catch { /* non-fatal */ }
 
     const body = await req.json();
     const plan = body.plan as keyof typeof PLANS;
-
     if (!plan || !PLANS[plan]) return errorResponse(400);
 
-    console.log('[checkout] plan:', plan, 'appUrl:', process.env.NEXT_PUBLIC_APP_URL);
-    const stripe = getStripe();
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+    const key = process.env.STRIPE_SECRET_KEY;
+    if (!key) return errorResponse(500);
 
-    const checkoutSession = await stripe.checkout.sessions.create({
-      payment_method_types: ['card'],
-      mode: 'subscription',
-      line_items: [
-        {
-          price_data: {
-            currency: 'usd',
-            product_data: {
-              name: `ClientPulse ${PLANS[plan].name}`,
-              description: `ClientPulse ${PLANS[plan].name} Plan - Monthly`,
-            },
-            unit_amount: PLANS[plan].price,
-            recurring: { interval: 'month' },
-          },
-          quantity: 1,
-        },
-      ],
-      success_url: `${appUrl}/admin?checkout=success`,
-      cancel_url: `${appUrl}/#pricing`,
-      metadata: {
-        userId: session?.userId || 'anonymous',
-        plan,
-      },
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+    const planData = PLANS[plan];
+
+    // Build form-encoded body for Stripe API
+    const params = new URLSearchParams({
+      'mode': 'subscription',
+      'payment_method_types[0]': 'card',
+      'line_items[0][price_data][currency]': 'usd',
+      'line_items[0][price_data][product_data][name]': `ClientPulse ${planData.name}`,
+      'line_items[0][price_data][product_data][description]': `ClientPulse ${planData.name} Plan - Monthly`,
+      'line_items[0][price_data][unit_amount]': String(planData.price),
+      'line_items[0][price_data][recurring][interval]': 'month',
+      'line_items[0][quantity]': '1',
+      'success_url': `${appUrl}/admin?checkout=success`,
+      'cancel_url': `${appUrl}/#pricing`,
+      'metadata[plan]': plan,
+      'metadata[userId]': session?.userId || 'anonymous',
     });
 
-    // Audit log — non-fatal if SQLite unavailable
-    try {
-      auditLog({
-        userId: session?.userId,
-        action: 'stripe_checkout_created',
-        resource: 'checkout',
-        resourceId: checkoutSession.id,
-        ip,
-      });
-    } catch { /* continue if audit logging fails */ }
+    const res = await fetch('https://api.stripe.com/v1/checkout/sessions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${key}`,
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: params.toString(),
+    });
 
-    return NextResponse.json({ url: checkoutSession.url });
-  } catch (err) {
-    return NextResponse.json({ debug: String(err) }, { status: 500 });
+    const data = await res.json() as { url?: string; error?: { message: string } };
+
+    if (!res.ok || !data.url) {
+      console.error('[stripe-checkout]', data.error?.message);
+      return errorResponse(500);
+    }
+
+    return NextResponse.json({ url: data.url });
+  } catch {
+    return errorResponse(500);
   }
 }
