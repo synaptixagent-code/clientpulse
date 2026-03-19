@@ -10,6 +10,7 @@ export default function LandingPage() {
       <Features />
       <HowItWorks />
       <Pricing />
+      <CTABanner />
       <FAQ />
       <Footer />
     </div>
@@ -21,10 +22,10 @@ function Nav() {
   return (
     <nav className="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-gray-100">
       <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
-        <div className="flex items-center gap-2">
+        <a href="/" className="flex items-center gap-2">
           <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold text-sm">CP</div>
           <span className="font-bold text-xl tracking-tight">ClientPulse</span>
-        </div>
+        </a>
         <div className="hidden sm:flex items-center gap-8 text-sm text-gray-500 font-medium">
           <a href="#features" className="hover:text-gray-900 transition">Features</a>
           <a href="#pricing" className="hover:text-gray-900 transition">Pricing</a>
@@ -44,7 +45,7 @@ function Nav() {
 // ─── Hero ─────────────────────────────────────────────────────────
 function DashboardMockup() {
   return (
-    <div className="relative w-full max-w-3xl mx-auto mt-16 rounded-2xl shadow-2xl shadow-blue-100 border border-gray-200 overflow-hidden bg-white">
+    <div className="relative w-full max-w-3xl mx-auto mt-14 rounded-2xl shadow-2xl shadow-blue-200/60 border border-gray-200 overflow-hidden bg-white">
       {/* Browser chrome */}
       <div className="bg-gray-100 px-4 py-3 flex items-center gap-2 border-b border-gray-200">
         <div className="flex gap-1.5">
@@ -56,10 +57,8 @@ function DashboardMockup() {
           app.clientpulse.io/dashboard
         </div>
       </div>
-
       {/* Dashboard content */}
       <div className="p-6 bg-gray-50">
-        {/* Top stats */}
         <div className="grid grid-cols-3 gap-4 mb-6">
           {[
             { label: "New Leads", value: "12", color: "text-blue-600", bg: "bg-blue-50" },
@@ -72,12 +71,10 @@ function DashboardMockup() {
             </div>
           ))}
         </div>
-
-        {/* Leads table */}
         <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
           <div className="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
             <span className="text-sm font-semibold text-gray-700">Recent Leads</span>
-            <span className="text-xs text-blue-600 font-medium cursor-pointer">View all</span>
+            <span className="text-xs text-blue-600 font-medium">View all</span>
           </div>
           <div className="divide-y divide-gray-50">
             {[
@@ -111,8 +108,10 @@ function DashboardMockup() {
 
 function Hero() {
   return (
-    <section className="py-24 sm:py-32 overflow-hidden">
-      <div className="max-w-5xl mx-auto px-6 text-center">
+    <section className="relative py-24 sm:py-32 overflow-hidden bg-gradient-to-b from-blue-50/60 via-white to-white">
+      {/* Subtle radial glow behind mockup */}
+      <div className="absolute inset-x-0 top-0 h-full bg-[radial-gradient(ellipse_80%_50%_at_50%_-10%,rgba(59,130,246,0.12),transparent)] pointer-events-none" />
+      <div className="relative max-w-5xl mx-auto px-6 text-center">
         <div className="inline-flex items-center gap-2 bg-blue-50 text-blue-700 px-4 py-1.5 rounded-full text-sm font-medium mb-8 border border-blue-100">
           <span className="w-1.5 h-1.5 bg-blue-500 rounded-full" />
           Built for service businesses
@@ -183,12 +182,12 @@ const featureIcons: Record<string, React.ReactNode> = {
 
 function Features() {
   const features = [
-    { iconKey: "intake", title: "Smart Intake Forms", desc: "Customizable forms that capture exactly what you need. Embed on your website or share a link — no coding required.", color: "text-blue-600 bg-blue-50" },
-    { iconKey: "followup", title: "Auto Follow-Ups", desc: "Set up email sequences that go out automatically. Day 1, Day 3, Day 7 — you choose the timing and message.", color: "text-violet-600 bg-violet-50" },
-    { iconKey: "dashboard", title: "Simple Dashboard", desc: "See all your leads in one place. Track who's been contacted, who responded, and who needs attention.", color: "text-emerald-600 bg-emerald-50" },
-    { iconKey: "security", title: "Enterprise Security", desc: "AES-256 encryption, OWASP-compliant, GDPR ready. Your client data is protected to bank-grade standards.", color: "text-orange-600 bg-orange-50" },
-    { iconKey: "setup", title: "5-Minute Setup", desc: "No IT team needed. Sign up, customize your form, share the link. You're live in minutes.", color: "text-rose-600 bg-rose-50" },
-    { iconKey: "pricing", title: "Affordable Pricing", desc: "One simple price. No per-contact fees, no surprise charges. Cancel anytime — no questions asked.", color: "text-teal-600 bg-teal-50" },
+    { iconKey: "intake",    title: "Smart Intake Forms",  topBorder: "border-t-blue-400",    color: "text-blue-600 bg-blue-50",    desc: "Customizable forms that capture exactly what you need. Embed on your website or share a link — no coding required." },
+    { iconKey: "followup",  title: "Auto Follow-Ups",     topBorder: "border-t-violet-400",  color: "text-violet-600 bg-violet-50", desc: "Set up email sequences that go out automatically. Day 1, Day 3, Day 7 — you choose the timing and message." },
+    { iconKey: "dashboard", title: "Simple Dashboard",    topBorder: "border-t-emerald-400", color: "text-emerald-600 bg-emerald-50", desc: "See all your leads in one place. Track who's been contacted, who responded, and who needs attention." },
+    { iconKey: "security",  title: "Enterprise Security", topBorder: "border-t-orange-400",  color: "text-orange-600 bg-orange-50",  desc: "AES-256 encryption, OWASP-compliant, GDPR ready. Your client data is protected to bank-grade standards." },
+    { iconKey: "setup",     title: "5-Minute Setup",      topBorder: "border-t-rose-400",    color: "text-rose-600 bg-rose-50",     desc: "No IT team needed. Sign up, customize your form, share the link. You're live in minutes." },
+    { iconKey: "pricing",   title: "Affordable Pricing",  topBorder: "border-t-teal-400",    color: "text-teal-600 bg-teal-50",    desc: "One simple price. No per-contact fees, no surprise charges. Cancel anytime — no questions asked." },
   ];
 
   return (
@@ -200,7 +199,10 @@ function Features() {
         </div>
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {features.map((f) => (
-            <div key={f.iconKey} className="bg-white p-7 rounded-2xl border border-gray-100 hover:shadow-lg hover:shadow-gray-100 hover:-translate-y-0.5 transition-all duration-200">
+            <div
+              key={f.iconKey}
+              className={`bg-white p-7 rounded-2xl border border-gray-100 border-t-4 ${f.topBorder} hover:shadow-lg hover:shadow-gray-100 hover:-translate-y-0.5 transition-all duration-200`}
+            >
               <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-5 ${f.color}`}>
                 {featureIcons[f.iconKey]}
               </div>
@@ -217,31 +219,68 @@ function Features() {
 // ─── How It Works ──────────────────────────────────────────────────
 function HowItWorks() {
   const steps = [
-    { num: "1", title: "Create your intake form", desc: "Choose what info you need from clients — name, email, phone, service type. Fully customizable in minutes." },
-    { num: "2", title: "Share the link", desc: "Embed on your website, share on social media, or text it to prospects. Works on any device." },
-    { num: "3", title: "Leads come in automatically", desc: "Every submission lands in your dashboard instantly. You get notified the moment someone fills out your form." },
-    { num: "4", title: "Follow-ups go out on autopilot", desc: "Personalized emails send at the intervals you choose. Clients feel cared for without you lifting a finger." },
+    {
+      num: "1", title: "Create your intake form",
+      desc: "Choose what info you need from clients — name, email, phone, service type. Fully customizable in minutes.",
+      icon: (
+        <svg className="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+        </svg>
+      ),
+    },
+    {
+      num: "2", title: "Share the link",
+      desc: "Embed on your website, share on social media, or text it to prospects. Works on any device.",
+      icon: (
+        <svg className="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+        </svg>
+      ),
+    },
+    {
+      num: "3", title: "Leads come in automatically",
+      desc: "Every submission lands in your dashboard instantly. You get notified the moment someone fills out your form.",
+      icon: (
+        <svg className="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+        </svg>
+      ),
+    },
+    {
+      num: "4", title: "Follow-ups go out on autopilot",
+      desc: "Personalized emails send at the intervals you choose. Clients feel cared for without you lifting a finger.",
+      icon: (
+        <svg className="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+        </svg>
+      ),
+    },
   ];
 
   return (
-    <section className="py-24">
-      <div className="max-w-4xl mx-auto px-6">
+    <section className="py-24 bg-slate-50">
+      <div className="max-w-6xl mx-auto px-6">
         <div className="text-center mb-16">
           <h2 className="text-3xl sm:text-4xl font-bold mb-4">How it works</h2>
           <p className="text-gray-500 text-lg">Up and running in under 5 minutes.</p>
         </div>
-        <div className="relative">
-          {/* Vertical connector line */}
-          <div className="absolute left-6 top-6 bottom-6 w-px bg-gray-100 hidden sm:block" />
-          <div className="space-y-10">
+        <div className="relative max-w-3xl mx-auto">
+          {/* Connector line */}
+          <div className="absolute left-6 top-6 bottom-6 w-0.5 bg-blue-100 hidden sm:block" />
+          <div className="space-y-6">
             {steps.map((s, i) => (
               <div key={i} className="flex gap-6 items-start relative">
                 <div className="w-12 h-12 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold text-lg shrink-0 z-10 shadow-lg shadow-blue-100">
                   {s.num}
                 </div>
-                <div className="bg-white border border-gray-100 rounded-2xl p-6 flex-1 hover:shadow-md transition">
-                  <h3 className="font-semibold text-lg mb-1.5 text-gray-900">{s.title}</h3>
-                  <p className="text-gray-500 leading-relaxed">{s.desc}</p>
+                <div className="bg-white border border-gray-100 rounded-2xl p-6 flex-1 flex items-start justify-between gap-4 hover:shadow-md hover:border-blue-100 transition">
+                  <div>
+                    <h3 className="font-semibold text-lg mb-1.5 text-gray-900">{s.title}</h3>
+                    <p className="text-gray-500 leading-relaxed text-sm">{s.desc}</p>
+                  </div>
+                  <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center shrink-0 mt-0.5">
+                    {s.icon}
+                  </div>
                 </div>
               </div>
             ))}
@@ -266,11 +305,15 @@ function Pricing() {
       });
       const data = await res.json();
       if (data.url) window.location.href = data.url;
+      else alert("Something went wrong. Please try again.");
     } catch {
       alert("Something went wrong. Please try again.");
     }
     setLoading(null);
   }
+
+  const starterFeatures = ["Unlimited intake forms", "3-step follow-up sequences", "Client dashboard", "Email notifications", "Basic analytics"];
+  const proFeatures     = ["Everything in Starter", "Unlimited follow-up sequences", "SMS follow-ups", "Custom branding", "Priority support", "API access"];
 
   return (
     <section id="pricing" className="py-24 bg-gray-50/70">
@@ -279,17 +322,18 @@ function Pricing() {
           <h2 className="text-3xl sm:text-4xl font-bold mb-4">Simple, honest pricing</h2>
           <p className="text-gray-500 text-lg">No hidden fees. No contracts. Cancel anytime.</p>
         </div>
-        <div className="grid sm:grid-cols-2 gap-6 max-w-3xl mx-auto">
+        <div className="grid sm:grid-cols-2 gap-6 max-w-3xl mx-auto items-stretch">
+
           {/* Starter */}
-          <div className="bg-white rounded-2xl border border-gray-200 p-8 hover:border-gray-300 transition">
+          <div className="bg-white rounded-2xl border border-gray-200 p-8 flex flex-col hover:border-blue-200 hover:shadow-lg transition">
             <h3 className="font-bold text-xl mb-1 text-gray-900">Starter</h3>
             <p className="text-gray-500 text-sm mb-6">Perfect for solo service providers.</p>
             <div className="flex items-baseline gap-1 mb-8">
               <span className="text-5xl font-bold text-gray-900">$29</span>
               <span className="text-gray-400 text-lg">/mo</span>
             </div>
-            <ul className="space-y-3.5 mb-8 text-sm text-gray-600">
-              {["Unlimited intake forms", "3-step follow-up sequences", "Client dashboard", "Email notifications", "Basic analytics"].map((item) => (
+            <ul className="space-y-3.5 mb-8 text-sm text-gray-600 flex-1">
+              {starterFeatures.map((item) => (
                 <li key={item} className="flex items-center gap-2.5">
                   <svg className="w-4 h-4 text-green-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
@@ -301,15 +345,15 @@ function Pricing() {
             <button
               onClick={() => handleCheckout("starter")}
               disabled={loading === "starter"}
-              className="w-full bg-gray-900 text-white py-3 rounded-xl font-semibold hover:bg-gray-800 transition disabled:opacity-50 text-sm"
+              className="w-full bg-blue-600 text-white py-3 rounded-xl font-semibold hover:bg-blue-700 transition disabled:opacity-50 text-sm mt-auto"
             >
               {loading === "starter" ? "Loading..." : "Get Started"}
             </button>
           </div>
 
           {/* Pro */}
-          <div className="bg-blue-600 rounded-2xl p-8 relative text-white shadow-xl shadow-blue-200">
-            <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-white text-blue-600 text-xs font-bold px-4 py-1.5 rounded-full border border-blue-100 shadow-sm">
+          <div className="bg-blue-600 rounded-2xl p-8 relative text-white shadow-xl shadow-blue-200 flex flex-col">
+            <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-white text-blue-600 text-xs font-bold px-4 py-1.5 rounded-full border border-blue-100 shadow-sm whitespace-nowrap">
               MOST POPULAR
             </div>
             <h3 className="font-bold text-xl mb-1">Pro</h3>
@@ -318,8 +362,8 @@ function Pricing() {
               <span className="text-5xl font-bold">$79</span>
               <span className="text-blue-300 text-lg">/mo</span>
             </div>
-            <ul className="space-y-3.5 mb-8 text-sm text-blue-100">
-              {["Everything in Starter", "Unlimited follow-up sequences", "SMS follow-ups", "Custom branding", "Priority support", "API access"].map((item) => (
+            <ul className="space-y-3.5 mb-8 text-sm text-blue-100 flex-1">
+              {proFeatures.map((item) => (
                 <li key={item} className="flex items-center gap-2.5">
                   <svg className="w-4 h-4 text-white shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
@@ -331,13 +375,47 @@ function Pricing() {
             <button
               onClick={() => handleCheckout("pro")}
               disabled={loading === "pro"}
-              className="w-full bg-white text-blue-600 py-3 rounded-xl font-semibold hover:bg-blue-50 transition disabled:opacity-50 text-sm shadow-sm"
+              className="w-full bg-white text-blue-600 py-3 rounded-xl font-semibold hover:bg-blue-50 transition disabled:opacity-50 text-sm shadow-sm mt-auto"
             >
               {loading === "pro" ? "Loading..." : "Get Started"}
             </button>
           </div>
+
         </div>
         <p className="text-center text-sm text-gray-400 mt-8">Both plans include a 7-day free trial · No credit card required</p>
+      </div>
+    </section>
+  );
+}
+
+// ─── CTA Banner ───────────────────────────────────────────────────
+function CTABanner() {
+  return (
+    <section className="py-20 bg-blue-600 relative overflow-hidden">
+      {/* Background decoration */}
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_70%_80%_at_50%_120%,rgba(255,255,255,0.08),transparent)] pointer-events-none" />
+      <div className="relative max-w-3xl mx-auto px-6 text-center">
+        <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">
+          Ready to stop losing leads?
+        </h2>
+        <p className="text-blue-200 text-lg mb-10 leading-relaxed">
+          Set up in 5 minutes. Your next client is already out there — make sure you follow up.
+        </p>
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+          <a
+            href="/signup"
+            className="w-full sm:w-auto bg-white text-blue-600 px-8 py-3.5 rounded-xl text-base font-semibold hover:bg-blue-50 transition shadow-lg"
+          >
+            Start Free Trial →
+          </a>
+          <a
+            href="#pricing"
+            className="w-full sm:w-auto text-blue-200 px-8 py-3.5 rounded-xl text-base font-medium hover:text-white hover:bg-white/10 transition border border-blue-400/50"
+          >
+            View pricing
+          </a>
+        </div>
+        <p className="mt-5 text-sm text-blue-300">No credit card required · 7-day free trial · Cancel anytime</p>
       </div>
     </section>
   );
@@ -360,8 +438,6 @@ function FAQ() {
     <section id="faq" className="py-24 bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900">
       <div className="max-w-6xl mx-auto px-6">
         <div className="grid lg:grid-cols-5 gap-16 items-start">
-
-          {/* Left — sticky label */}
           <div className="lg:col-span-2 lg:sticky lg:top-28">
             <div className="inline-flex items-center gap-2 bg-blue-500/20 text-blue-300 px-3 py-1 rounded-full text-sm font-medium mb-6 border border-blue-500/30">
               <span className="w-1.5 h-1.5 bg-blue-400 rounded-full" />
@@ -383,16 +459,12 @@ function FAQ() {
               Email us
             </a>
           </div>
-
-          {/* Right — accordion */}
           <div className="lg:col-span-3 space-y-3">
             {faqs.map((f, i) => (
               <div
                 key={i}
                 className={`rounded-2xl border transition-all duration-200 overflow-hidden ${
-                  open === i
-                    ? "bg-white/10 border-blue-400/50"
-                    : "bg-white/5 border-white/10 hover:bg-white/8 hover:border-white/20"
+                  open === i ? "bg-white/10 border-blue-400/50" : "bg-white/5 border-white/10 hover:border-white/20"
                 }`}
               >
                 <button
@@ -416,7 +488,6 @@ function FAQ() {
               </div>
             ))}
           </div>
-
         </div>
       </div>
     </section>
@@ -428,36 +499,43 @@ function Footer() {
   return (
     <footer className="bg-gray-950 text-gray-500">
       <div className="max-w-6xl mx-auto px-6 py-16">
-        <div className="grid sm:grid-cols-4 gap-10 pb-12 border-b border-gray-800">
-          {/* Brand */}
+        <div className="grid sm:grid-cols-5 gap-10 pb-12 border-b border-gray-800">
+
+          {/* Brand — 2 cols */}
           <div className="sm:col-span-2">
-            <div className="flex items-center gap-2 mb-4">
+            <a href="/" className="flex items-center gap-2 mb-4">
               <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold text-sm">CP</div>
               <span className="font-bold text-lg text-white">ClientPulse</span>
-            </div>
-            <p className="text-sm leading-relaxed max-w-xs mb-6">
+            </a>
+            <p className="text-sm leading-relaxed mb-6">
               Client intake and follow-up automation for service businesses. Never lose a lead again.
             </p>
-            <a
-              href="/signup"
-              className="inline-flex items-center gap-2 bg-blue-600 text-white px-5 py-2.5 rounded-lg text-sm font-semibold hover:bg-blue-700 transition"
-            >
+            <a href="/signup" className="inline-flex items-center gap-2 bg-blue-600 text-white px-5 py-2.5 rounded-lg text-sm font-semibold hover:bg-blue-700 transition">
               Start Free Trial →
             </a>
           </div>
 
-          {/* Product */}
+          {/* Product — 1 col */}
           <div>
             <h4 className="text-white font-semibold mb-4 text-sm">Product</h4>
             <ul className="space-y-3 text-sm">
               <li><a href="#features" className="hover:text-white transition">Features</a></li>
               <li><a href="#pricing" className="hover:text-white transition">Pricing</a></li>
               <li><a href="#faq" className="hover:text-white transition">FAQ</a></li>
-              <li><a href="/signup" className="hover:text-white transition">Sign Up</a></li>
             </ul>
           </div>
 
-          {/* Legal */}
+          {/* Get started — 1 col */}
+          <div>
+            <h4 className="text-white font-semibold mb-4 text-sm">Get Started</h4>
+            <ul className="space-y-3 text-sm">
+              <li><a href="/signup" className="hover:text-white transition">Sign Up</a></li>
+              <li><a href="/login" className="hover:text-white transition">Log In</a></li>
+              <li><a href="/intake" className="hover:text-white transition">Intake Form</a></li>
+            </ul>
+          </div>
+
+          {/* Legal — 1 col */}
           <div>
             <h4 className="text-white font-semibold mb-4 text-sm">Company</h4>
             <ul className="space-y-3 text-sm">
@@ -466,11 +544,11 @@ function Footer() {
               <li><a href="mailto:hello@clientpulse.io" className="hover:text-white transition">Contact</a></li>
             </ul>
           </div>
-        </div>
 
+        </div>
         <div className="pt-8 flex flex-col sm:flex-row justify-between items-center gap-4">
           <p className="text-xs">&copy; {new Date().getFullYear()} ClientPulse. All rights reserved.</p>
-          <p className="text-xs">Early access · <a href="/signup" className="text-blue-500 hover:text-blue-400">Join today</a></p>
+          <p className="text-xs">Early access · <a href="/signup" className="text-blue-500 hover:text-blue-400 transition">Join today</a></p>
         </div>
       </div>
     </footer>
