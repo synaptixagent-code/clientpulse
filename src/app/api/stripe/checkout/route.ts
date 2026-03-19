@@ -62,7 +62,7 @@ export async function POST(req: NextRequest) {
     } catch { /* continue if audit logging fails */ }
 
     return NextResponse.json({ url: checkoutSession.url });
-  } catch {
-    return errorResponse(500);
+  } catch (err) {
+    return NextResponse.json({ debug: String(err) }, { status: 500 });
   }
 }
