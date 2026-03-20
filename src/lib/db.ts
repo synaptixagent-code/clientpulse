@@ -114,6 +114,17 @@ function initSchema(db: Database.Database) {
 
     CREATE INDEX IF NOT EXISTS idx_email_logs_submission ON email_logs(submission_id);
     CREATE INDEX IF NOT EXISTS idx_email_logs_business ON email_logs(business_id);
+
+    CREATE TABLE IF NOT EXISTS password_reset_tokens (
+      id TEXT PRIMARY KEY,
+      user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      token_hash TEXT NOT NULL UNIQUE,
+      expires_at TEXT NOT NULL,
+      used INTEGER NOT NULL DEFAULT 0,
+      created_at TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_reset_tokens_hash ON password_reset_tokens(token_hash);
   `);
 
   // Column migrations — run after tables are created

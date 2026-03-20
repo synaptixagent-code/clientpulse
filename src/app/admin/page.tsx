@@ -40,76 +40,82 @@ export default function AdminDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="bg-white border-b border-gray-200">
+    <div className="min-h-screen bg-slate-900 text-white">
+      {/* Header */}
+      <header className="bg-slate-900/95 backdrop-blur border-b border-white/10 sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold text-sm">CP</div>
-            <span className="font-bold text-xl">ClientPulse</span>
-            <span className="text-xs bg-gray-100 px-2 py-0.5 rounded ml-2 text-gray-500">Admin</span>
+            <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center text-white font-bold text-sm">CP</div>
+            <span className="font-bold text-lg text-white">ClientPulse</span>
+            <span className="text-xs bg-white/10 text-slate-400 px-2 py-0.5 rounded ml-1">Admin</span>
           </div>
-          <button onClick={handleLogout} className="text-sm text-gray-600 hover:text-gray-900">Log out</button>
+          <button
+            onClick={handleLogout}
+            className="text-sm text-slate-400 hover:text-white transition"
+          >
+            Log out
+          </button>
         </div>
       </header>
 
       <main className="max-w-7xl mx-auto px-6 py-8">
         <div className="mb-8">
-          <h1 className="text-2xl font-bold mb-1">Dashboard</h1>
-          <p className="text-gray-600 text-sm">Manage your client submissions and follow-ups.</p>
+          <h1 className="text-2xl font-bold text-white mb-1">Dashboard</h1>
+          <p className="text-slate-400 text-sm">Manage your client submissions and follow-ups.</p>
         </div>
 
         {/* Stats */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
-          <StatCard label="Total Leads" value={submissions.length} />
-          <StatCard label="New" value={submissions.filter(s => s.status === "new").length} />
-          <StatCard label="Follow-ups Sent" value={submissions.reduce((a, s) => a + s.followups_sent, 0)} />
-          <StatCard label="Follow-ups Pending" value={submissions.reduce((a, s) => a + s.followup_count - s.followups_sent, 0)} />
+          <StatCard label="Total Leads" value={submissions.length} color="text-white" />
+          <StatCard label="New" value={submissions.filter(s => s.status === "new").length} color="text-blue-400" />
+          <StatCard label="Follow-ups Sent" value={submissions.reduce((a, s) => a + s.followups_sent, 0)} color="text-emerald-400" />
+          <StatCard label="Follow-ups Pending" value={submissions.reduce((a, s) => a + (s.followup_count - s.followups_sent), 0)} color="text-orange-400" />
         </div>
 
-        {/* Submissions Table */}
+        {/* Table */}
         {loading ? (
-          <div className="text-center py-16 text-gray-400">Loading...</div>
+          <div className="text-center py-16 text-slate-500">Loading...</div>
         ) : error ? (
-          <div className="text-center py-16 text-red-500">{error}</div>
+          <div className="text-center py-16 text-red-400">{error}</div>
         ) : submissions.length === 0 ? (
-          <div className="bg-white rounded-xl border border-gray-200 p-12 text-center">
-            <p className="text-gray-500 mb-4">No submissions yet.</p>
-            <p className="text-sm text-gray-400">Share your intake form link to start capturing leads.</p>
-            <div className="mt-6 bg-gray-50 rounded-lg p-4 inline-block">
-              <code className="text-sm text-blue-600">
-                {typeof window !== "undefined" ? window.location.origin : ""}/intake?business=YOUR_ID
+          <div className="bg-slate-800/50 rounded-2xl border border-slate-700 p-12 text-center">
+            <p className="text-slate-400 mb-2">No submissions yet.</p>
+            <p className="text-sm text-slate-500 mb-6">Share your intake form link to start capturing leads.</p>
+            <div className="bg-slate-900 rounded-xl p-4 inline-block border border-slate-700">
+              <code className="text-sm text-blue-400">
+                {typeof window !== "undefined" ? window.location.origin : "https://clientpulse.dev"}/intake?business=YOUR_ID
               </code>
             </div>
           </div>
         ) : (
-          <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+          <div className="bg-slate-800/50 rounded-2xl border border-slate-700 overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
-                <thead className="bg-gray-50 border-b border-gray-200">
+                <thead className="border-b border-slate-700">
                   <tr>
-                    <th className="text-left px-4 py-3 font-medium text-gray-500">Client</th>
-                    <th className="text-left px-4 py-3 font-medium text-gray-500">Email</th>
-                    <th className="text-left px-4 py-3 font-medium text-gray-500">Service</th>
-                    <th className="text-left px-4 py-3 font-medium text-gray-500">Status</th>
-                    <th className="text-left px-4 py-3 font-medium text-gray-500">Follow-ups</th>
-                    <th className="text-left px-4 py-3 font-medium text-gray-500">Date</th>
+                    <th className="text-left px-5 py-3.5 font-medium text-slate-400">Client</th>
+                    <th className="text-left px-5 py-3.5 font-medium text-slate-400">Email</th>
+                    <th className="text-left px-5 py-3.5 font-medium text-slate-400">Service</th>
+                    <th className="text-left px-5 py-3.5 font-medium text-slate-400">Status</th>
+                    <th className="text-left px-5 py-3.5 font-medium text-slate-400">Follow-ups</th>
+                    <th className="text-left px-5 py-3.5 font-medium text-slate-400">Date</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-100">
+                <tbody className="divide-y divide-slate-700/50">
                   {submissions.map((s) => (
-                    <tr key={s.id} className="hover:bg-gray-50">
-                      <td className="px-4 py-3 font-medium">{s.client_name}</td>
-                      <td className="px-4 py-3 text-gray-600">{s.client_email}</td>
-                      <td className="px-4 py-3 text-gray-600">{s.service_requested || "—"}</td>
-                      <td className="px-4 py-3">
-                        <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
-                          s.status === "new" ? "bg-blue-50 text-blue-700" :
-                          s.status === "contacted" ? "bg-green-50 text-green-700" :
-                          "bg-gray-100 text-gray-600"
+                    <tr key={s.id} className="hover:bg-slate-700/30 transition">
+                      <td className="px-5 py-3.5 font-medium text-white">{s.client_name}</td>
+                      <td className="px-5 py-3.5 text-slate-300">{s.client_email}</td>
+                      <td className="px-5 py-3.5 text-slate-400">{s.service_requested || "—"}</td>
+                      <td className="px-5 py-3.5">
+                        <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${
+                          s.status === "new" ? "bg-blue-500/15 text-blue-300" :
+                          s.status === "contacted" ? "bg-emerald-500/15 text-emerald-300" :
+                          "bg-slate-700 text-slate-400"
                         }`}>{s.status}</span>
                       </td>
-                      <td className="px-4 py-3 text-gray-600">{s.followups_sent}/{s.followup_count}</td>
-                      <td className="px-4 py-3 text-gray-400">{new Date(s.created_at).toLocaleDateString()}</td>
+                      <td className="px-5 py-3.5 text-slate-400">{s.followups_sent}/{s.followup_count}</td>
+                      <td className="px-5 py-3.5 text-slate-500">{new Date(s.created_at).toLocaleDateString()}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -122,11 +128,11 @@ export default function AdminDashboard() {
   );
 }
 
-function StatCard({ label, value }: { label: string; value: number }) {
+function StatCard({ label, value, color }: { label: string; value: number; color: string }) {
   return (
-    <div className="bg-white rounded-xl border border-gray-200 p-4">
-      <p className="text-sm text-gray-500 mb-1">{label}</p>
-      <p className="text-2xl font-bold">{value}</p>
+    <div className="bg-slate-800/50 rounded-2xl border border-slate-700 p-5">
+      <p className="text-sm text-slate-400 mb-1">{label}</p>
+      <p className={`text-3xl font-bold ${color}`}>{value}</p>
     </div>
   );
 }

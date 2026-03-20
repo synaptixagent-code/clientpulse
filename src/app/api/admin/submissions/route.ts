@@ -6,8 +6,10 @@ import { checkRateLimit, getClientIp, auditLog, errorResponse } from '@/lib/secu
 
 export async function GET(req: NextRequest) {
   const ip = getClientIp(req);
-  const { allowed } = checkRateLimit(ip, 'api');
-  if (!allowed) return errorResponse(429);
+  try {
+    const { allowed } = checkRateLimit(ip, 'api');
+    if (!allowed) return errorResponse(429);
+  } catch { /* non-fatal */ }
 
   const session = await getSessionFromCookies();
   if (!session) return errorResponse(401);

@@ -7,8 +7,10 @@ import { v4 as uuid } from 'uuid';
 export async function POST(req: NextRequest) {
   const ip = getClientIp(req);
 
-  const { allowed } = checkRateLimit(ip, 'intake');
-  if (!allowed) return errorResponse(429);
+  try {
+    const { allowed } = checkRateLimit(ip, 'intake');
+    if (!allowed) return errorResponse(429);
+  } catch { /* non-fatal */ }
 
   try {
     const body = await req.json();
