@@ -16,8 +16,19 @@ export async function GET(req: NextRequest) {
 
   try {
     const db = getDb();
-    const user = db.prepare('SELECT role FROM users WHERE id = ?').get(session.userId) as { role: string } | undefined;
+    const user = db.prepare('SELECT role, created_at FROM users WHERE id = ?').get(session.userId) as { role: string; created_at: string } | undefined;
     if (!user || user.role !== 'admin') return errorResponse(403);
+
+    // Trial enforcement: 7 days from signup, unless active subscription exists
+    const subscription = db.prepare(
+      "SELECT id FROM subscriptions WHERE user_id = ? AND status = 'active'"
+    ).get(session.userId);
+    if (!subscription) {
+      const daysSinceSignup = (Date.now() - new Date(user.created_at).getTime()) / 86_400_000;
+      if (daysSinceSignup > 7) {
+        return NextResponse.json({ error: 'trial_expired' }, { status: 402 });
+      }
+    }
 
     const submissions = db.prepare(`
       SELECT s.*, COUNT(f.id) as followup_count,

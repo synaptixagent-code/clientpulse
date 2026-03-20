@@ -3,6 +3,14 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
+interface Followup {
+  id: string;
+  subject: string;
+  status: string;
+  scheduled_at: string;
+  sent_at: string | null;
+}
+
 interface Submission {
   id: string;
   client_name: string;
@@ -14,18 +22,22 @@ interface Submission {
   created_at: string;
   followup_count: number;
   followups_sent: number;
+  followups?: Followup[];
 }
 
 export default function AdminDashboard() {
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [expanded, setExpanded] = useState<string | null>(null);
+  const [updating, setUpdating] = useState<string | null>(null);
   const router = useRouter();
 
   useEffect(() => {
     fetch("/api/admin/submissions")
       .then((res) => {
         if (res.status === 401) { router.push("/login"); return null; }
+        if (res.status === 402) { router.push("/upgrade"); return null; }
         if (!res.ok) throw new Error("Failed to load");
         return res.json();
       })
@@ -34,14 +46,34 @@ export default function AdminDashboard() {
       .finally(() => setLoading(false));
   }, [router]);
 
+  async function updateStatus(id: string, status: string) {
+    setUpdating(id);
+    try {
+      const res = await fetch(`/api/admin/submissions/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status }),
+      });
+      if (res.ok) {
+        setSubmissions(prev => prev.map(s => s.id === id ? { ...s, status } : s));
+      }
+    } finally {
+      setUpdating(null);
+    }
+  }
+
   async function handleLogout() {
     await fetch("/api/auth/logout", { method: "POST" });
     router.push("/login");
   }
 
+  const statusColor = (s: string) =>
+    s === "new" ? "bg-blue-500/15 text-blue-300" :
+    s === "contacted" ? "bg-emerald-500/15 text-emerald-300" :
+    "bg-slate-700 text-slate-400";
+
   return (
     <div className="min-h-screen bg-slate-900 text-white">
-      {/* Header */}
       <header className="bg-slate-900/95 backdrop-blur border-b border-white/10 sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -49,12 +81,7 @@ export default function AdminDashboard() {
             <span className="font-bold text-lg text-white">ClientPulse</span>
             <span className="text-xs bg-white/10 text-slate-400 px-2 py-0.5 rounded ml-1">Admin</span>
           </div>
-          <button
-            onClick={handleLogout}
-            className="text-sm text-slate-400 hover:text-white transition"
-          >
-            Log out
-          </button>
+          <button onClick={handleLogout} className="text-sm text-slate-400 hover:text-white transition">Log out</button>
         </div>
       </header>
 
@@ -72,7 +99,6 @@ export default function AdminDashboard() {
           <StatCard label="Follow-ups Pending" value={submissions.reduce((a, s) => a + (s.followup_count - s.followups_sent), 0)} color="text-orange-400" />
         </div>
 
-        {/* Table */}
         {loading ? (
           <div className="text-center py-16 text-slate-500">Loading...</div>
         ) : error ? (
@@ -94,29 +120,116 @@ export default function AdminDashboard() {
                 <thead className="border-b border-slate-700">
                   <tr>
                     <th className="text-left px-5 py-3.5 font-medium text-slate-400">Client</th>
-                    <th className="text-left px-5 py-3.5 font-medium text-slate-400">Email</th>
-                    <th className="text-left px-5 py-3.5 font-medium text-slate-400">Service</th>
+                    <th className="text-left px-5 py-3.5 font-medium text-slate-400 hidden sm:table-cell">Service</th>
                     <th className="text-left px-5 py-3.5 font-medium text-slate-400">Status</th>
-                    <th className="text-left px-5 py-3.5 font-medium text-slate-400">Follow-ups</th>
-                    <th className="text-left px-5 py-3.5 font-medium text-slate-400">Date</th>
+                    <th className="text-left px-5 py-3.5 font-medium text-slate-400 hidden md:table-cell">Follow-ups</th>
+                    <th className="text-left px-5 py-3.5 font-medium text-slate-400 hidden lg:table-cell">Date</th>
+                    <th className="px-5 py-3.5" />
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-700/50">
+                <tbody>
                   {submissions.map((s) => (
-                    <tr key={s.id} className="hover:bg-slate-700/30 transition">
-                      <td className="px-5 py-3.5 font-medium text-white">{s.client_name}</td>
-                      <td className="px-5 py-3.5 text-slate-300">{s.client_email}</td>
-                      <td className="px-5 py-3.5 text-slate-400">{s.service_requested || "—"}</td>
-                      <td className="px-5 py-3.5">
-                        <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${
-                          s.status === "new" ? "bg-blue-500/15 text-blue-300" :
-                          s.status === "contacted" ? "bg-emerald-500/15 text-emerald-300" :
-                          "bg-slate-700 text-slate-400"
-                        }`}>{s.status}</span>
-                      </td>
-                      <td className="px-5 py-3.5 text-slate-400">{s.followups_sent}/{s.followup_count}</td>
-                      <td className="px-5 py-3.5 text-slate-500">{new Date(s.created_at).toLocaleDateString()}</td>
-                    </tr>
+                    <>
+                      <tr
+                        key={s.id}
+                        className="border-t border-slate-700/50 hover:bg-slate-700/20 transition cursor-pointer"
+                        onClick={() => setExpanded(expanded === s.id ? null : s.id)}
+                      >
+                        <td className="px-5 py-4">
+                          <div className="font-medium text-white">{s.client_name}</div>
+                          <div className="text-xs text-slate-400 mt-0.5">{s.client_email}</div>
+                        </td>
+                        <td className="px-5 py-4 text-slate-400 hidden sm:table-cell">{s.service_requested || "—"}</td>
+                        <td className="px-5 py-4">
+                          <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${statusColor(s.status)}`}>
+                            {s.status}
+                          </span>
+                        </td>
+                        <td className="px-5 py-4 text-slate-400 hidden md:table-cell">
+                          {s.followups_sent}/{s.followup_count} sent
+                        </td>
+                        <td className="px-5 py-4 text-slate-500 hidden lg:table-cell text-xs">
+                          {new Date(s.created_at).toLocaleDateString()}
+                        </td>
+                        <td className="px-5 py-4 text-right">
+                          <svg
+                            className={`w-4 h-4 text-slate-500 transition-transform ml-auto ${expanded === s.id ? "rotate-180" : ""}`}
+                            fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                          >
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                          </svg>
+                        </td>
+                      </tr>
+
+                      {/* Expanded detail row */}
+                      {expanded === s.id && (
+                        <tr key={`${s.id}-detail`} className="border-t border-slate-700/30 bg-slate-800/40">
+                          <td colSpan={6} className="px-5 py-5">
+                            <div className="grid sm:grid-cols-3 gap-6">
+
+                              {/* Contact info */}
+                              <div>
+                                <h4 className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-3">Contact</h4>
+                                <div className="space-y-1.5 text-sm">
+                                  <div><span className="text-slate-500">Email: </span><span className="text-slate-200">{s.client_email}</span></div>
+                                  {s.client_phone && <div><span className="text-slate-500">Phone: </span><span className="text-slate-200">{s.client_phone}</span></div>}
+                                  <div><span className="text-slate-500">Service: </span><span className="text-slate-200">{s.service_requested || "—"}</span></div>
+                                  <div><span className="text-slate-500">Date: </span><span className="text-slate-200">{new Date(s.created_at).toLocaleString()}</span></div>
+                                </div>
+                              </div>
+
+                              {/* Message */}
+                              <div>
+                                <h4 className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-3">Message</h4>
+                                <p className="text-sm text-slate-300 leading-relaxed whitespace-pre-wrap">
+                                  {s.message || <span className="text-slate-500 italic">No message</span>}
+                                </p>
+                              </div>
+
+                              {/* Actions + Follow-ups */}
+                              <div>
+                                <h4 className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-3">Actions</h4>
+                                <div className="flex flex-wrap gap-2 mb-5">
+                                  {["new", "contacted", "closed"].map(st => (
+                                    <button
+                                      key={st}
+                                      disabled={s.status === st || updating === s.id}
+                                      onClick={(e) => { e.stopPropagation(); updateStatus(s.id, st); }}
+                                      className={`px-3 py-1.5 rounded-lg text-xs font-medium transition disabled:opacity-40 ${
+                                        s.status === st
+                                          ? statusColor(st) + " cursor-default"
+                                          : "bg-slate-700 text-slate-300 hover:bg-slate-600"
+                                      }`}
+                                    >
+                                      {st.charAt(0).toUpperCase() + st.slice(1)}
+                                    </button>
+                                  ))}
+                                </div>
+                                <h4 className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-2">Follow-ups</h4>
+                                <div className="space-y-1.5">
+                                  {s.followup_count === 0 ? (
+                                    <p className="text-xs text-slate-500 italic">No follow-ups scheduled</p>
+                                  ) : (
+                                    Array.from({ length: s.followup_count }, (_, i) => i).map(i => {
+                                      const isSent = i < s.followups_sent;
+                                      const labels = ["Day 1", "Day 3", "Day 7"];
+                                      return (
+                                        <div key={i} className="flex items-center gap-2 text-xs">
+                                          <div className={`w-2 h-2 rounded-full ${isSent ? "bg-emerald-400" : "bg-slate-600"}`} />
+                                          <span className={isSent ? "text-emerald-300" : "text-slate-500"}>
+                                            {labels[i] || `Email ${i + 1}`} — {isSent ? "sent" : "pending"}
+                                          </span>
+                                        </div>
+                                      );
+                                    })
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          </td>
+                        </tr>
+                      )}
+                    </>
                   ))}
                 </tbody>
               </table>

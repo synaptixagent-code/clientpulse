@@ -8,6 +8,21 @@ const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"]
 export const metadata: Metadata = {
   title: "ClientPulse - Client Intake & Follow-Up Automation",
   description: "Automate client intake and follow-up for your service business. Capture leads, send automated follow-ups, and never lose a client again.",
+  metadataBase: new URL("https://clientpulse.dev"),
+  openGraph: {
+    title: "ClientPulse - Client Intake & Follow-Up Automation",
+    description: "Capture leads with a simple intake form. Automated follow-up emails go out on Day 1, 3, and 7 — so you never lose a client to slow follow-up again.",
+    url: "https://clientpulse.dev",
+    siteName: "ClientPulse",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "ClientPulse - Never Lose a Client to Slow Follow-Up",
+    description: "Automated client intake and follow-up for service businesses. Set up in 5 minutes.",
+  },
+  keywords: ["client intake form", "follow-up automation", "service business CRM", "lead capture", "automated follow-up emails"],
+  robots: { index: true, follow: true },
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
