@@ -98,5 +98,21 @@ function initSchema(db: Database.Database) {
     CREATE INDEX IF NOT EXISTS idx_audit_user ON audit_log(user_id);
     CREATE INDEX IF NOT EXISTS idx_audit_ip ON audit_log(ip_address);
     CREATE INDEX IF NOT EXISTS idx_rate_limits_window ON rate_limits(window_start);
+
+    CREATE TABLE IF NOT EXISTS email_logs (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      followup_id TEXT,
+      submission_id TEXT,
+      business_id TEXT,
+      to_email TEXT,
+      subject TEXT,
+      status TEXT NOT NULL DEFAULT 'sent',
+      resend_id TEXT,
+      error TEXT,
+      created_at TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_email_logs_submission ON email_logs(submission_id);
+    CREATE INDEX IF NOT EXISTS idx_email_logs_business ON email_logs(business_id);
   `);
 }
