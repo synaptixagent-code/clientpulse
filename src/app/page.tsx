@@ -262,7 +262,7 @@ function Pricing() {
               <span className="text-slate-500 text-lg">/mo</span>
             </div>
             <ul className="space-y-3.5 mb-8 text-sm text-slate-300 flex-1">
-              {["Up to 50 clients", "Unlimited intake forms", "3-step follow-up sequences", "Client dashboard", "Email notifications", "Basic analytics"].map((item) => (
+              {["Up to 50 clients", "Unlimited intake forms", "3-step follow-up sequences", "Client dashboard", "Email notifications", "Lead tracking dashboard"].map((item) => (
                 <li key={item} className="flex items-center gap-2.5">
                   <svg className="w-4 h-4 text-emerald-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />

@@ -21,7 +21,7 @@ export const PLANS = {
       'Automated follow-up emails (3-step)',
       'Client dashboard',
       'Email notifications',
-      'Basic analytics',
+      'Lead tracking dashboard',
     ],
   },
   pro: {

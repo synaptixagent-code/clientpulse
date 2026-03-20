@@ -25,12 +25,22 @@ interface Submission {
   followups?: Followup[];
 }
 
+interface PlanInfo {
+  name: string;
+  limit: number;
+  used: number;
+  intakeUrl: string;
+}
+
 export default function AdminDashboard() {
   const [submissions, setSubmissions] = useState<Submission[]>([]);
+  const [plan, setPlan] = useState<PlanInfo | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [expanded, setExpanded] = useState<string | null>(null);
   const [updating, setUpdating] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
+  const [billingLoading, setBillingLoading] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -41,10 +51,39 @@ export default function AdminDashboard() {
         if (!res.ok) throw new Error("Failed to load");
         return res.json();
       })
-      .then((data) => { if (data) setSubmissions(data.submissions); })
+      .then((data) => {
+        if (data) {
+          setSubmissions(data.submissions);
+          setPlan(data.plan ?? null);
+        }
+      })
       .catch(() => setError("Failed to load submissions"))
       .finally(() => setLoading(false));
   }, [router]);
+
+  async function handleBillingPortal() {
+    setBillingLoading(true);
+    try {
+      const res = await fetch('/api/stripe/portal', { method: 'POST' });
+      const data = await res.json();
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        alert(data.error || 'Could not open billing portal.');
+      }
+    } catch {
+      alert('Something went wrong. Please try again.');
+    } finally {
+      setBillingLoading(false);
+    }
+  }
+
+  function copyIntakeUrl() {
+    if (!plan) return;
+    navigator.clipboard.writeText(plan.intakeUrl);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  }
 
   async function updateStatus(id: string, status: string) {
     setUpdating(id);
@@ -81,19 +120,46 @@ export default function AdminDashboard() {
             <span className="font-bold text-lg text-white">ClientPulse</span>
             <span className="text-xs bg-white/10 text-slate-400 px-2 py-0.5 rounded ml-1">Admin</span>
           </div>
-          <button onClick={handleLogout} className="text-sm text-slate-400 hover:text-white transition">Log out</button>
+          <div className="flex items-center gap-4">
+            <a href="/admin/settings" className="text-sm text-slate-400 hover:text-white transition">Settings</a>
+            <button onClick={handleBillingPortal} disabled={billingLoading} className="text-sm text-slate-400 hover:text-white transition disabled:opacity-50">
+              {billingLoading ? "Loading..." : "Billing"}
+            </button>
+            <button onClick={handleLogout} className="text-sm text-slate-400 hover:text-white transition">Log out</button>
+          </div>
         </div>
       </header>
 
       <main className="max-w-7xl mx-auto px-6 py-8">
-        <div className="mb-8">
+        <div className="mb-6">
           <h1 className="text-2xl font-bold text-white mb-1">Dashboard</h1>
           <p className="text-slate-400 text-sm">Manage your client submissions and follow-ups.</p>
         </div>
 
+        {/* Intake URL Banner */}
+        {plan && (
+          <div className="bg-slate-800/50 rounded-2xl border border-slate-700 p-5 mb-6 flex flex-col sm:flex-row sm:items-center gap-4">
+            <div className="flex-1 min-w-0">
+              <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-1.5">Your Client Intake Form</p>
+              <code className="text-sm text-blue-400 break-all">{plan.intakeUrl}</code>
+              <p className="text-xs text-slate-500 mt-1.5">Share this link with clients to capture leads automatically.</p>
+            </div>
+            <button
+              onClick={copyIntakeUrl}
+              className="shrink-0 bg-blue-600 hover:bg-blue-500 text-white text-sm px-5 py-2.5 rounded-xl transition font-semibold"
+            >
+              {copied ? "Copied!" : "Copy Link"}
+            </button>
+          </div>
+        )}
+
         {/* Stats */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
-          <StatCard label="Total Leads" value={submissions.length} color="text-white" />
+          <StatCard
+            label="Total Leads"
+            value={`${submissions.length}${plan ? ` / ${plan.limit}` : ""}`}
+            color="text-white"
+          />
           <StatCard label="New" value={submissions.filter(s => s.status === "new").length} color="text-blue-400" />
           <StatCard label="Follow-ups Sent" value={submissions.reduce((a, s) => a + s.followups_sent, 0)} color="text-emerald-400" />
           <StatCard label="Follow-ups Pending" value={submissions.reduce((a, s) => a + (s.followup_count - s.followups_sent), 0)} color="text-orange-400" />
@@ -107,11 +173,14 @@ export default function AdminDashboard() {
           <div className="bg-slate-800/50 rounded-2xl border border-slate-700 p-12 text-center">
             <p className="text-slate-400 mb-2">No submissions yet.</p>
             <p className="text-sm text-slate-500 mb-6">Share your intake form link to start capturing leads.</p>
-            <div className="bg-slate-900 rounded-xl p-4 inline-block border border-slate-700">
-              <code className="text-sm text-blue-400">
-                {typeof window !== "undefined" ? window.location.origin : "https://clientpulse.dev"}/intake?business=YOUR_ID
-              </code>
-            </div>
+            {plan && (
+              <div className="bg-slate-900 rounded-xl p-4 inline-flex items-center gap-3 border border-slate-700">
+                <code className="text-sm text-blue-400 break-all">{plan.intakeUrl}</code>
+                <button onClick={copyIntakeUrl} className="shrink-0 text-xs bg-blue-600 hover:bg-blue-500 text-white px-3 py-1.5 rounded-lg transition font-medium">
+                  {copied ? "Copied!" : "Copy"}
+                </button>
+              </div>
+            )}
           </div>
         ) : (
           <div className="bg-slate-800/50 rounded-2xl border border-slate-700 overflow-hidden">
@@ -212,7 +281,7 @@ export default function AdminDashboard() {
                                   ) : (
                                     Array.from({ length: s.followup_count }, (_, i) => i).map(i => {
                                       const isSent = i < s.followups_sent;
-                                      const labels = ["Day 1", "Day 3", "Day 7"];
+                                      const labels = ["Day 1", "Day 3", "Day 7", "Day 14", "Day 30"];
                                       return (
                                         <div key={i} className="flex items-center gap-2 text-xs">
                                           <div className={`w-2 h-2 rounded-full ${isSent ? "bg-emerald-400" : "bg-slate-600"}`} />
@@ -241,7 +310,7 @@ export default function AdminDashboard() {
   );
 }
 
-function StatCard({ label, value, color }: { label: string; value: number; color: string }) {
+function StatCard({ label, value, color }: { label: string; value: number | string; color: string }) {
   return (
     <div className="bg-slate-800/50 rounded-2xl border border-slate-700 p-5">
       <p className="text-sm text-slate-400 mb-1">{label}</p>

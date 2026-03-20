@@ -1,13 +1,13 @@
 import { SignJWT, jwtVerify } from 'jose';
 import { hashSync, compareSync } from 'bcryptjs';
 import { cookies } from 'next/headers';
-import { getDb } from './db';
+import { getDb, ensureSchema, str } from './db';
 import { v4 as uuid } from 'uuid';
 
 const BCRYPT_ROUNDS = 12;
-const SESSION_DURATION_MS = 2 * 60 * 60 * 1000; // 2 hours
+const SESSION_DURATION_MS = 2 * 60 * 60 * 1000;
 const MAX_FAILED_ATTEMPTS = 5;
-const LOCKOUT_DURATION_MS = 15 * 60 * 1000; // 15 minutes
+const LOCKOUT_DURATION_MS = 15 * 60 * 1000;
 const COOKIE_NAME = 'cpulse_session';
 
 function getJwtSecret(): Uint8Array {
@@ -25,11 +25,15 @@ export function verifyPassword(password: string, hash: string): boolean {
 }
 
 export async function createSession(userId: string): Promise<string> {
+  await ensureSchema();
   const db = getDb();
   const sessionId = uuid();
   const expiresAt = new Date(Date.now() + SESSION_DURATION_MS).toISOString();
 
-  db.prepare('INSERT INTO sessions (id, user_id, expires_at) VALUES (?, ?, ?)').run(sessionId, userId, expiresAt);
+  await db.execute({
+    sql: 'INSERT INTO sessions (id, user_id, expires_at) VALUES (?, ?, ?)',
+    args: [sessionId, userId, expiresAt],
+  });
 
   const token = await new SignJWT({ sub: userId, sid: sessionId })
     .setProtectedHeader({ alg: 'HS256' })
@@ -46,10 +50,14 @@ export async function verifySession(token: string): Promise<{ userId: string; se
     const userId = payload.sub as string;
     const sessionId = payload.sid as string;
 
+    await ensureSchema();
     const db = getDb();
-    const session = db.prepare('SELECT * FROM sessions WHERE id = ? AND user_id = ? AND expires_at > datetime(\'now\')').get(sessionId, userId) as { id: string } | undefined;
+    const result = await db.execute({
+      sql: "SELECT id FROM sessions WHERE id = ? AND user_id = ? AND expires_at > datetime('now')",
+      args: [sessionId, userId],
+    });
 
-    if (!session) return null;
+    if (!result.rows[0]) return null;
     return { userId, sessionId };
   } catch {
     return null;
@@ -85,44 +93,70 @@ export function clearSessionCookie(): { name: string; value: string; options: Re
   };
 }
 
-export function checkAccountLock(email: string): { locked: boolean; minutesRemaining?: number } {
+export async function checkAccountLock(email: string): Promise<{ locked: boolean; minutesRemaining?: number }> {
+  await ensureSchema();
   const db = getDb();
-  const user = db.prepare('SELECT failed_login_attempts, locked_until FROM users WHERE email = ?').get(email) as { failed_login_attempts: number; locked_until: string | null } | undefined;
-
+  const result = await db.execute({
+    sql: 'SELECT failed_login_attempts, locked_until FROM users WHERE email = ?',
+    args: [email],
+  });
+  const user = result.rows[0];
   if (!user) return { locked: false };
 
-  if (user.locked_until) {
-    const lockExpiry = new Date(user.locked_until).getTime();
+  const lockedUntil = str(user.locked_until);
+  if (lockedUntil) {
+    const lockExpiry = new Date(lockedUntil).getTime();
     if (Date.now() < lockExpiry) {
       return { locked: true, minutesRemaining: Math.ceil((lockExpiry - Date.now()) / 60000) };
     }
-    // Lock expired, reset
-    db.prepare('UPDATE users SET failed_login_attempts = 0, locked_until = NULL WHERE email = ?').run(email);
+    await db.execute({
+      sql: 'UPDATE users SET failed_login_attempts = 0, locked_until = NULL WHERE email = ?',
+      args: [email],
+    });
   }
 
   return { locked: false };
 }
 
-export function recordFailedLogin(email: string): void {
+export async function recordFailedLogin(email: string): Promise<void> {
+  await ensureSchema();
   const db = getDb();
-  const user = db.prepare('SELECT failed_login_attempts FROM users WHERE email = ?').get(email) as { failed_login_attempts: number } | undefined;
+  const result = await db.execute({
+    sql: 'SELECT failed_login_attempts FROM users WHERE email = ?',
+    args: [email],
+  });
+  const user = result.rows[0];
   if (!user) return;
 
-  const newCount = user.failed_login_attempts + 1;
+  const newCount = Number(user.failed_login_attempts) + 1;
   if (newCount >= MAX_FAILED_ATTEMPTS) {
     const lockedUntil = new Date(Date.now() + LOCKOUT_DURATION_MS).toISOString();
-    db.prepare('UPDATE users SET failed_login_attempts = ?, locked_until = ? WHERE email = ?').run(newCount, lockedUntil, email);
+    await db.execute({
+      sql: 'UPDATE users SET failed_login_attempts = ?, locked_until = ? WHERE email = ?',
+      args: [newCount, lockedUntil, email],
+    });
   } else {
-    db.prepare('UPDATE users SET failed_login_attempts = ? WHERE email = ?').run(newCount, email);
+    await db.execute({
+      sql: 'UPDATE users SET failed_login_attempts = ? WHERE email = ?',
+      args: [newCount, email],
+    });
   }
 }
 
-export function resetFailedLogins(email: string): void {
+export async function resetFailedLogins(email: string): Promise<void> {
+  await ensureSchema();
   const db = getDb();
-  db.prepare('UPDATE users SET failed_login_attempts = 0, locked_until = NULL WHERE email = ?').run(email);
+  await db.execute({
+    sql: 'UPDATE users SET failed_login_attempts = 0, locked_until = NULL WHERE email = ?',
+    args: [email],
+  });
 }
 
-export function destroySession(sessionId: string): void {
+export async function destroySession(sessionId: string): Promise<void> {
+  await ensureSchema();
   const db = getDb();
-  db.prepare('DELETE FROM sessions WHERE id = ?').run(sessionId);
+  await db.execute({
+    sql: 'DELETE FROM sessions WHERE id = ?',
+    args: [sessionId],
+  });
 }

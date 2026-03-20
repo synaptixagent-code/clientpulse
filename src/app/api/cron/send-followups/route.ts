@@ -1,36 +1,11 @@
-/**
- * Vercel Cron Job — runs every hour.
- * Finds pending follow-up emails that are due, sends them via Resend,
- * and logs results to the email_logs table.
- *
- * Schedule: "0 * * * *" (top of every hour) — configured in vercel.json
- */
-
 import { NextRequest, NextResponse } from 'next/server';
-import { getDb } from '@/lib/db';
+import { getDb, ensureSchema, str, num } from '@/lib/db';
 import { decrypt } from '@/lib/crypto';
 import { sendEmail } from '@/lib/email';
-import { getTemplate } from '@/lib/email-templates';
-
-interface FollowupRow {
-  id: string;
-  submission_id: string;
-  subject: string;
-  body: string;
-  scheduled_at: string;
-  sequence_index: number;
-}
-
-interface SubmissionRow {
-  id: string;
-  business_id: string;
-  client_name: string;
-  client_email: string;
-  service_requested: string | null;
-}
+import { getTemplate, type BrandingVars } from '@/lib/email-templates';
+import { sendSms } from '@/lib/sms';
 
 export async function GET(req: NextRequest) {
-  // Verify this is a legitimate Vercel cron request
   const cronSecret = process.env.CRON_SECRET;
   if (cronSecret) {
     const auth = req.headers.get('authorization');
@@ -42,99 +17,164 @@ export async function GET(req: NextRequest) {
   const results = { sent: 0, failed: 0, skipped: 0, errors: [] as string[] };
 
   try {
+    await ensureSchema();
     const db = getDb();
 
-    // Fetch all pending follow-ups that are due now
-    const due = db.prepare(`
-      SELECT
-        f.id,
-        f.submission_id,
-        f.subject,
-        f.body,
-        f.scheduled_at,
-        ROW_NUMBER() OVER (PARTITION BY f.submission_id ORDER BY f.scheduled_at) - 1 AS sequence_index
-      FROM followups f
-      WHERE f.status = 'pending'
-        AND f.scheduled_at <= datetime('now')
-      ORDER BY f.scheduled_at ASC
-      LIMIT 50
-    `).all() as FollowupRow[];
+    const dueResult = await db.execute({
+      sql: `SELECT
+              f.id,
+              f.submission_id,
+              f.type,
+              f.subject,
+              f.body,
+              f.scheduled_at,
+              ROW_NUMBER() OVER (PARTITION BY f.submission_id ORDER BY f.scheduled_at) - 1 AS sequence_index
+            FROM followups f
+            WHERE f.status = 'pending'
+              AND f.scheduled_at <= datetime('now')
+            ORDER BY f.scheduled_at ASC
+            LIMIT 50`,
+      args: [],
+    });
 
-    for (const followup of due) {
-      let submission: SubmissionRow | undefined;
+    for (const followup of dueResult.rows) {
+      let submissionRow;
 
       try {
-        submission = db.prepare(`
-          SELECT id, business_id, client_name, client_email, service_requested
-          FROM submissions WHERE id = ?
-        `).get(followup.submission_id) as SubmissionRow | undefined;
+        const subResult = await db.execute({
+          sql: 'SELECT id, business_id, client_name, client_email, client_phone, service_requested FROM submissions WHERE id = ?',
+          args: [str(followup.submission_id)],
+        });
+        submissionRow = subResult.rows[0];
       } catch {
         results.skipped++;
         continue;
       }
 
-      if (!submission) {
-        // Submission deleted — mark followup as cancelled
-        db.prepare(`UPDATE followups SET status = 'cancelled' WHERE id = ?`).run(followup.id);
+      if (!submissionRow) {
+        await db.execute({
+          sql: "UPDATE followups SET status = 'cancelled' WHERE id = ?",
+          args: [str(followup.id)],
+        });
         results.skipped++;
         continue;
       }
 
-      // Decrypt sensitive fields
       let clientName: string;
       let clientEmail: string;
 
       try {
-        clientName = decrypt(submission.client_name);
-        clientEmail = decrypt(submission.client_email);
+        clientName = decrypt(str(submissionRow.client_name));
+        clientEmail = decrypt(str(submissionRow.client_email));
       } catch {
         results.skipped++;
         continue;
       }
 
-      // Build HTML email from template
-      const html = getTemplate(followup.sequence_index, {
-        clientName,
-        serviceRequested: submission.service_requested || undefined,
-        businessName: submission.business_id,
-      });
+      // Look up branding for this business
+      let branding: BrandingVars | undefined;
+      try {
+        const brandResult = await db.execute({
+          sql: 'SELECT company_name, reply_email, brand_color, footer_text FROM branding WHERE user_id = ?',
+          args: [str(submissionRow.business_id)],
+        });
+        if (brandResult.rows[0]) {
+          const b = brandResult.rows[0];
+          branding = {
+            companyName: str(b.company_name) || undefined,
+            replyEmail:  str(b.reply_email)  || undefined,
+            brandColor:  str(b.brand_color)  || undefined,
+            footerText:  str(b.footer_text)  || undefined,
+          };
+        }
+      } catch { /* non-fatal */ }
 
-      // Send via Resend
+      const followupType = str(followup.type) || 'email';
+
+      if (followupType === 'sms') {
+        // Decrypt phone number
+        let clientPhone: string;
+        try {
+          const rawPhone = str(submissionRow.client_phone);
+          if (!rawPhone) { results.skipped++; continue; }
+          clientPhone = decrypt(rawPhone);
+        } catch {
+          results.skipped++;
+          continue;
+        }
+
+        // Replace template variables in SMS body
+        const smsBody = str(followup.body)
+          .replace(/\{\{name\}\}/g, clientName)
+          .replace(/\{\{service\}\}/g, str(submissionRow.service_requested) || 'our services');
+
+        const smsResult = await sendSms({ to: clientPhone, body: smsBody });
+        const now = new Date().toISOString();
+
+        if (smsResult.ok) {
+          await db.execute({
+            sql: "UPDATE followups SET status = 'sent', sent_at = ? WHERE id = ?",
+            args: [now, str(followup.id)],
+          });
+          await db.execute({
+            sql: `INSERT INTO sms_logs (followup_id, submission_id, business_id, to_phone, body, status, twilio_sid)
+                  VALUES (?, ?, ?, ?, ?, 'sent', ?)`,
+            args: [str(followup.id), str(submissionRow.id), str(submissionRow.business_id), clientPhone, smsBody, smsResult.sid ?? null],
+          });
+          results.sent++;
+        } else {
+          await db.execute({
+            sql: "UPDATE followups SET status = 'failed' WHERE id = ?",
+            args: [str(followup.id)],
+          });
+          await db.execute({
+            sql: `INSERT INTO sms_logs (followup_id, submission_id, business_id, to_phone, body, status, error)
+                  VALUES (?, ?, ?, ?, ?, 'failed', ?)`,
+            args: [str(followup.id), str(submissionRow.id), str(submissionRow.business_id), clientPhone, smsBody, smsResult.error ?? 'Unknown error'],
+          });
+          results.failed++;
+          results.errors.push(`[SMS ${str(followup.id)}] ${smsResult.error}`);
+        }
+        continue; // Skip email path for SMS followups
+      }
+
+      const html = getTemplate(num(followup.sequence_index), {
+        clientName,
+        serviceRequested: submissionRow.service_requested ? str(submissionRow.service_requested) : undefined,
+        businessName: str(submissionRow.business_id),
+      }, branding);
+
       const result = await sendEmail({
         to: clientEmail,
-        subject: followup.subject,
+        subject: str(followup.subject),
         html,
       });
 
       const now = new Date().toISOString();
 
       if (result.ok) {
-        // Mark as sent
-        db.prepare(`
-          UPDATE followups SET status = 'sent', sent_at = ? WHERE id = ?
-        `).run(now, followup.id);
-
-        // Log success
-        db.prepare(`
-          INSERT INTO email_logs (followup_id, submission_id, business_id, to_email, subject, status, resend_id)
-          VALUES (?, ?, ?, ?, ?, 'sent', ?)
-        `).run(followup.id, submission.id, submission.business_id, clientEmail, followup.subject, result.id ?? null);
-
+        await db.execute({
+          sql: "UPDATE followups SET status = 'sent', sent_at = ? WHERE id = ?",
+          args: [now, str(followup.id)],
+        });
+        await db.execute({
+          sql: `INSERT INTO email_logs (followup_id, submission_id, business_id, to_email, subject, status, resend_id)
+                VALUES (?, ?, ?, ?, ?, 'sent', ?)`,
+          args: [str(followup.id), str(submissionRow.id), str(submissionRow.business_id), clientEmail, str(followup.subject), result.id ?? null],
+        });
         results.sent++;
       } else {
-        // Mark as failed
-        db.prepare(`
-          UPDATE followups SET status = 'failed' WHERE id = ?
-        `).run(followup.id);
-
-        // Log failure
-        db.prepare(`
-          INSERT INTO email_logs (followup_id, submission_id, business_id, to_email, subject, status, error)
-          VALUES (?, ?, ?, ?, ?, 'failed', ?)
-        `).run(followup.id, submission.id, submission.business_id, clientEmail, followup.subject, result.error ?? 'Unknown error');
-
+        await db.execute({
+          sql: "UPDATE followups SET status = 'failed' WHERE id = ?",
+          args: [str(followup.id)],
+        });
+        await db.execute({
+          sql: `INSERT INTO email_logs (followup_id, submission_id, business_id, to_email, subject, status, error)
+                VALUES (?, ?, ?, ?, ?, 'failed', ?)`,
+          args: [str(followup.id), str(submissionRow.id), str(submissionRow.business_id), clientEmail, str(followup.subject), result.error ?? 'Unknown error'],
+        });
         results.failed++;
-        results.errors.push(`[${followup.id}] ${result.error}`);
+        results.errors.push(`[${str(followup.id)}] ${result.error}`);
       }
     }
 

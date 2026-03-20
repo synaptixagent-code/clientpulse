@@ -1,10 +1,11 @@
 import { NextResponse } from 'next/server';
-import { getDb } from '@/lib/db';
+import { getDb, ensureSchema } from '@/lib/db';
 
 export async function GET() {
   try {
+    await ensureSchema();
     const db = getDb();
-    db.prepare('SELECT 1').get();
+    await db.execute('SELECT 1');
 
     return NextResponse.json({
       status: 'healthy',

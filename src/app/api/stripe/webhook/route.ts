@@ -1,10 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import crypto from 'crypto';
-import { getDb } from '@/lib/db';
+import { getDb, ensureSchema, str } from '@/lib/db';
 import { auditLog } from '@/lib/security';
 import { v4 as uuid } from 'uuid';
 
-// Verify Stripe webhook signature using native crypto (no SDK needed)
 function verifyAndParse(body: string, signature: string, secret: string): Record<string, unknown> {
   const parts = signature.split(',').reduce<Record<string, string>>((acc, part) => {
     const [k, v] = part.split('=');
@@ -16,7 +15,6 @@ function verifyAndParse(body: string, signature: string, secret: string): Record
   const sig = parts['v1'];
   if (!timestamp || !sig) throw new Error('Invalid signature header');
 
-  // Replay attack protection: reject events older than 5 minutes
   if (Math.abs(Date.now() / 1000 - parseInt(timestamp, 10)) > 300) {
     throw new Error('Webhook timestamp too old');
   }
@@ -35,7 +33,7 @@ function verifyAndParse(body: string, signature: string, secret: string): Record
 
 export async function POST(req: NextRequest) {
   const body = await req.text();
-  const sig  = req.headers.get('stripe-signature');
+  const sig = req.headers.get('stripe-signature');
 
   if (!sig) return NextResponse.json({ error: 'Missing signature' }, { status: 400 });
 
@@ -46,11 +44,11 @@ export async function POST(req: NextRequest) {
     if (webhookSecret) {
       event = verifyAndParse(body, sig, webhookSecret);
     } else {
-      // Dev fallback: no verification
       event = JSON.parse(body);
     }
 
     try {
+      await ensureSchema();
       const db = getDb();
 
       switch (event.type) {
@@ -59,10 +57,11 @@ export async function POST(req: NextRequest) {
           const obj = session.object;
           const userId = obj.metadata?.userId;
           if (userId && userId !== 'anonymous') {
-            db.prepare(`
-              INSERT OR REPLACE INTO subscriptions (id, user_id, stripe_customer_id, stripe_subscription_id, plan, status)
-              VALUES (?, ?, ?, ?, ?, 'active')
-            `).run(uuid(), userId, obj.customer ?? null, obj.subscription ?? null, obj.metadata?.plan || 'starter');
+            await db.execute({
+              sql: `INSERT OR REPLACE INTO subscriptions (id, user_id, stripe_customer_id, stripe_subscription_id, plan, status)
+                    VALUES (?, ?, ?, ?, ?, 'active')`,
+              args: [uuid(), userId, obj.customer ?? null, obj.subscription ?? null, obj.metadata?.plan || 'starter'],
+            });
           }
           auditLog({ action: 'subscription_created', resource: 'subscriptions', details: `customer: ${obj.customer}` });
           break;
@@ -70,7 +69,10 @@ export async function POST(req: NextRequest) {
 
         case 'customer.subscription.deleted': {
           const sub = (event.data as { object: { id: string } }).object;
-          db.prepare('UPDATE subscriptions SET status = ? WHERE stripe_subscription_id = ?').run('cancelled', sub.id);
+          await db.execute({
+            sql: 'UPDATE subscriptions SET status = ? WHERE stripe_subscription_id = ?',
+            args: ['cancelled', sub.id],
+          });
           auditLog({ action: 'subscription_cancelled', resource: 'subscriptions', details: `sub: ${sub.id}` });
           break;
         }
@@ -82,7 +84,6 @@ export async function POST(req: NextRequest) {
         }
       }
     } catch (dbErr) {
-      // DB failure shouldn't prevent Stripe from retrying other events
       console.error('[webhook-db]', String(dbErr));
     }
 

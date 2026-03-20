@@ -8,7 +8,7 @@ export async function POST(req: NextRequest) {
     const ip = getClientIp(req);
 
     try {
-      const { allowed } = checkRateLimit(ip, 'api');
+      const { allowed } = await checkRateLimit(ip, 'api');
       if (!allowed) return errorResponse(429);
     } catch { /* non-fatal */ }
 
