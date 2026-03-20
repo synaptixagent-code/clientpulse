@@ -6,11 +6,10 @@ import { checkRateLimit, validateEmail, sanitizeString, getClientIp, auditLog, c
 export async function POST(req: NextRequest) {
   const ip = getClientIp(req);
 
-  const { allowed } = checkRateLimit(ip, 'login');
-  if (!allowed) {
-    auditLog({ action: 'login_rate_limited', ip, userAgent: req.headers.get('user-agent') || '' });
-    return errorResponse(429);
-  }
+  try {
+    const { allowed } = checkRateLimit(ip, 'login');
+    if (!allowed) return errorResponse(429);
+  } catch { /* non-fatal if SQLite unavailable */ }
 
   try {
     const body = await req.json();

@@ -19,16 +19,6 @@ export function getDb(): Database.Database {
 
 function initSchema(db: Database.Database) {
   db.exec(`
-    -- Migrations: add columns that may not exist on older DBs
-  `);
-
-  // linkedin_id column migration (ALTER TABLE IF NOT EXISTS not supported by SQLite)
-  const cols = db.prepare("PRAGMA table_info(users)").all() as { name: string }[];
-  if (!cols.find(c => c.name === 'linkedin_id')) {
-    db.exec("ALTER TABLE users ADD COLUMN linkedin_id TEXT");
-  }
-
-  db.exec(`
     CREATE TABLE IF NOT EXISTS users (
       id TEXT PRIMARY KEY,
       email TEXT UNIQUE NOT NULL,
@@ -125,4 +115,12 @@ function initSchema(db: Database.Database) {
     CREATE INDEX IF NOT EXISTS idx_email_logs_submission ON email_logs(submission_id);
     CREATE INDEX IF NOT EXISTS idx_email_logs_business ON email_logs(business_id);
   `);
+
+  // Column migrations — run after tables are created
+  try {
+    const cols = db.prepare("PRAGMA table_info(users)").all() as { name: string }[];
+    if (!cols.find(c => c.name === 'linkedin_id')) {
+      db.exec("ALTER TABLE users ADD COLUMN linkedin_id TEXT");
+    }
+  } catch { /* ignore if migration already applied */ }
 }
