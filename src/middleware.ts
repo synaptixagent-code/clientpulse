@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { jwtVerify } from 'jose';
 
-export function middleware(req: NextRequest) {
+export async function middleware(req: NextRequest) {
   const response = NextResponse.next();
 
   // Security headers
@@ -22,10 +23,20 @@ export function middleware(req: NextRequest) {
     response.headers.set('Access-Control-Allow-Origin', appUrl);
   }
 
-  // Protect admin routes
+  // Protect admin routes — verify JWT signature and expiry, not just cookie existence
   if (req.nextUrl.pathname.startsWith('/admin')) {
     const sessionCookie = req.cookies.get('cpulse_session');
-    if (!sessionCookie) {
+    if (!sessionCookie?.value) {
+      return NextResponse.redirect(new URL('/login', req.url));
+    }
+    try {
+      const secret = process.env.JWT_SECRET;
+      if (!secret) {
+        return NextResponse.redirect(new URL('/login', req.url));
+      }
+      const key = new TextEncoder().encode(secret);
+      await jwtVerify(sessionCookie.value, key);
+    } catch {
       return NextResponse.redirect(new URL('/login', req.url));
     }
   }

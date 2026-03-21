@@ -2,10 +2,16 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createHash } from 'crypto';
 import { getDb, ensureSchema, str, num } from '@/lib/db';
 import { hashPassword } from '@/lib/auth';
-import { validatePassword, sanitizeString, errorResponse } from '@/lib/security';
+import { validatePassword, sanitizeString, checkRateLimit, getClientIp, errorResponse } from '@/lib/security';
 
 export async function POST(req: NextRequest) {
   try {
+    const ip = getClientIp(req);
+    try {
+      const { allowed } = await checkRateLimit(ip, 'login');
+      if (!allowed) return errorResponse(429);
+    } catch { /* non-fatal */ }
+
     const body = await req.json();
     const token = sanitizeString(body.token || '');
     const password = body.password || '';

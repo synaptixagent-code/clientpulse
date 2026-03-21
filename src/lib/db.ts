@@ -119,6 +119,7 @@ export async function ensureSchema(): Promise<void> {
       used INTEGER NOT NULL DEFAULT 0,
       created_at TEXT NOT NULL DEFAULT (datetime('now'))
     )`,
+    `ALTER TABLE submissions ADD COLUMN unsubscribed INTEGER NOT NULL DEFAULT 0`,
     `CREATE INDEX IF NOT EXISTS idx_submissions_business ON submissions(business_id)`,
     `CREATE INDEX IF NOT EXISTS idx_followups_scheduled ON followups(scheduled_at, status)`,
     `CREATE INDEX IF NOT EXISTS idx_audit_user ON audit_log(user_id)`,
@@ -150,7 +151,12 @@ export async function ensureSchema(): Promise<void> {
   ];
 
   for (const sql of statements) {
-    await db.execute(sql);
+    try {
+      await db.execute(sql);
+    } catch (err) {
+      const msg = String(err);
+      if (!msg.includes('duplicate column')) throw err;
+    }
   }
 
   _schemaInitialized = true;

@@ -131,7 +131,7 @@ function Hero() {
             See how it works
           </a>
         </div>
-        <p className="mt-4 text-sm text-slate-500">7-day free trial · Card required to start</p>
+        <p className="mt-4 text-sm text-slate-500">7-day free trial · No credit card required</p>
         <DashboardMockup />
       </div>
     </section>
@@ -305,7 +305,7 @@ function Pricing() {
           </div>
 
         </div>
-        <p className="text-center text-sm text-slate-500 mt-8">7-day free trial · Card required to start</p>
+        <p className="text-center text-sm text-slate-500 mt-8">7-day free trial · No credit card required</p>
       </div>
     </section>
   );

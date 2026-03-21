@@ -9,6 +9,7 @@ interface SendEmailOptions {
   subject: string;
   html: string;
   replyTo?: string;
+  unsubscribeUrl?: string;
 }
 
 interface ResendResponse {
@@ -38,6 +39,7 @@ export async function sendEmail(opts: SendEmailOptions): Promise<{ ok: boolean; 
         subject: opts.subject,
         html: opts.html,
         ...(opts.replyTo ? { reply_to: opts.replyTo } : {}),
+        ...(opts.unsubscribeUrl ? { headers: { 'List-Unsubscribe': `<${opts.unsubscribeUrl}>`, 'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click' } } : {}),
       }),
     });
 

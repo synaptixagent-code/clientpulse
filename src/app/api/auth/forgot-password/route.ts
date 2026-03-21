@@ -1,12 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { randomBytes, createHash } from 'crypto';
 import { getDb, ensureSchema, str } from '@/lib/db';
-import { validateEmail, sanitizeString, getClientIp, errorResponse } from '@/lib/security';
+import { validateEmail, sanitizeString, getClientIp, checkRateLimit, auditLog, errorResponse } from '@/lib/security';
 import { sendEmail } from '@/lib/email';
 import { v4 as uuid } from 'uuid';
 
 export async function POST(req: NextRequest) {
   try {
+    const ip = getClientIp(req);
+    try {
+      const { allowed } = await checkRateLimit(ip, 'login');
+      if (!allowed) return errorResponse(429);
+    } catch { /* non-fatal */ }
+
     const body = await req.json();
     const email = sanitizeString(body.email || '').toLowerCase();
 
@@ -40,7 +46,6 @@ export async function POST(req: NextRequest) {
 
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
     const resetUrl = `${appUrl}/reset-password?token=${token}`;
-    const ip = getClientIp(req);
     const userName = str(user.name) || 'there';
 
     const html = `<!DOCTYPE html>
@@ -81,7 +86,7 @@ export async function POST(req: NextRequest) {
 
     await sendEmail({ to: email, subject: 'Reset your ClientPulse password', html });
 
-    console.log(`[forgot-password] Reset link sent to ${email} from IP ${ip}`);
+    auditLog({ action: 'password_reset_requested', ip, details: 'Reset email sent' });
     return NextResponse.json({ success: true });
   } catch (err) {
     console.error('[forgot-password]', err);

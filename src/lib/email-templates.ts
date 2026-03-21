@@ -8,6 +8,7 @@ interface TemplateVars {
   serviceRequested?: string;
   businessName?: string;
   replyEmail?: string;
+  unsubscribeUrl?: string;
 }
 
 export interface BrandingVars {
@@ -80,6 +81,9 @@ function baseTemplate(content: string, vars: TemplateVars, branding?: BrandingVa
               <p style="margin:8px 0 0;color:#475569;font-size:12px;">
                 &copy; ${new Date().getFullYear()} ${company}. All rights reserved.
               </p>
+              ${vars.unsubscribeUrl ? `<p style="margin:8px 0 0;color:#64748b;font-size:11px;">
+                <a href="${vars.unsubscribeUrl}" style="color:#64748b;text-decoration:underline;">Unsubscribe</a> from future follow-up emails.
+              </p>` : ''}
             </td>
           </tr>
 

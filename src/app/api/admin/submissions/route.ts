@@ -44,6 +44,12 @@ export async function GET(req: NextRequest) {
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://clientpulse.dev';
     const intakeUrl = `${appUrl}/intake?businessId=${session.userId}`;
 
+    const countResult = await db.execute({
+      sql: 'SELECT COUNT(*) as total FROM submissions WHERE business_id = ?',
+      args: [session.userId],
+    });
+    const totalCount = num(countResult.rows[0]?.total ?? 0);
+
     const submissionsResult = await db.execute({
       sql: `SELECT s.id, s.business_id, s.client_name, s.client_email, s.client_phone,
               s.service_requested, s.message, s.status, s.created_at,
@@ -51,10 +57,11 @@ export async function GET(req: NextRequest) {
               SUM(CASE WHEN f.status = 'sent' THEN 1 ELSE 0 END) as followups_sent
             FROM submissions s
             LEFT JOIN followups f ON f.submission_id = s.id
+            WHERE s.business_id = ?
             GROUP BY s.id
             ORDER BY s.created_at DESC
             LIMIT 100`,
-      args: [],
+      args: [session.userId],
     });
 
     const decrypted = submissionsResult.rows.map(s => {
@@ -99,7 +106,7 @@ export async function GET(req: NextRequest) {
       plan: {
         name: planName,
         limit: planLimit,
-        used: decrypted.length,
+        used: totalCount,
         intakeUrl,
       },
     });

@@ -15,6 +15,10 @@ export async function POST(req: NextRequest) {
     let session = null;
     try { session = await getSessionFromCookies(); } catch { /* non-fatal */ }
 
+    if (!session) {
+      return NextResponse.json({ error: 'Please sign up or log in before subscribing.' }, { status: 401 });
+    }
+
     const body = await req.json();
     const plan = body.plan as keyof typeof PLANS;
     if (!plan || !PLANS[plan]) return errorResponse(400);
@@ -38,7 +42,7 @@ export async function POST(req: NextRequest) {
       'success_url': `${appUrl}/admin?checkout=success`,
       'cancel_url': `${appUrl}/#pricing`,
       'metadata[plan]': plan,
-      'metadata[userId]': session?.userId || 'anonymous',
+      'metadata[userId]': session?.userId || '',
     });
 
     const res = await fetch('https://api.stripe.com/v1/checkout/sessions', {

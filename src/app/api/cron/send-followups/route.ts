@@ -4,14 +4,16 @@ import { decrypt } from '@/lib/crypto';
 import { sendEmail } from '@/lib/email';
 import { getTemplate, type BrandingVars } from '@/lib/email-templates';
 import { sendSms } from '@/lib/sms';
+import { getUnsubscribeUrl } from '@/lib/unsubscribe';
 
 export async function GET(req: NextRequest) {
   const cronSecret = process.env.CRON_SECRET;
-  if (cronSecret) {
-    const auth = req.headers.get('authorization');
-    if (auth !== `Bearer ${cronSecret}`) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+  if (!cronSecret) {
+    return NextResponse.json({ error: 'CRON_SECRET not configured' }, { status: 500 });
+  }
+  const auth = req.headers.get('authorization');
+  if (auth !== `Bearer ${cronSecret}`) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
   const results = { sent: 0, failed: 0, skipped: 0, errors: [] as string[] };
@@ -42,7 +44,7 @@ export async function GET(req: NextRequest) {
 
       try {
         const subResult = await db.execute({
-          sql: 'SELECT id, business_id, client_name, client_email, client_phone, service_requested FROM submissions WHERE id = ?',
+          sql: 'SELECT id, business_id, client_name, client_email, client_phone, service_requested, unsubscribed FROM submissions WHERE id = ?',
           args: [str(followup.submission_id)],
         });
         submissionRow = subResult.rows[0];
@@ -52,6 +54,15 @@ export async function GET(req: NextRequest) {
       }
 
       if (!submissionRow) {
+        await db.execute({
+          sql: "UPDATE followups SET status = 'cancelled' WHERE id = ?",
+          args: [str(followup.id)],
+        });
+        results.skipped++;
+        continue;
+      }
+
+      if (Number(submissionRow.unsubscribed)) {
         await db.execute({
           sql: "UPDATE followups SET status = 'cancelled' WHERE id = ?",
           args: [str(followup.id)],
@@ -138,16 +149,20 @@ export async function GET(req: NextRequest) {
         continue; // Skip email path for SMS followups
       }
 
+      const unsubscribeUrl = getUnsubscribeUrl(str(submissionRow.id));
+
       const html = getTemplate(num(followup.sequence_index), {
         clientName,
         serviceRequested: submissionRow.service_requested ? str(submissionRow.service_requested) : undefined,
         businessName: str(submissionRow.business_id),
+        unsubscribeUrl,
       }, branding);
 
       const result = await sendEmail({
         to: clientEmail,
         subject: str(followup.subject),
         html,
+        unsubscribeUrl,
       });
 
       const now = new Date().toISOString();

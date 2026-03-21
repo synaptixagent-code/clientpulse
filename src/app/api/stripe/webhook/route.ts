@@ -41,11 +41,11 @@ export async function POST(req: NextRequest) {
     const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
     let event: Record<string, unknown>;
 
-    if (webhookSecret) {
-      event = verifyAndParse(body, sig, webhookSecret);
-    } else {
-      event = JSON.parse(body);
+    if (!webhookSecret) {
+      console.error('[webhook] STRIPE_WEBHOOK_SECRET not set — rejecting request');
+      return NextResponse.json({ error: 'Webhook not configured' }, { status: 500 });
     }
+    event = verifyAndParse(body, sig, webhookSecret);
 
     try {
       await ensureSchema();

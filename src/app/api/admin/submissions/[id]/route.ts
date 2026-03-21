@@ -27,8 +27,8 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     if (!user || str(user.role) !== 'admin') return errorResponse(403);
 
     const result = await db.execute({
-      sql: "UPDATE submissions SET status = ?, updated_at = datetime('now') WHERE id = ?",
-      args: [status, id],
+      sql: "UPDATE submissions SET status = ?, updated_at = datetime('now') WHERE id = ? AND business_id = ?",
+      args: [status, id, session.userId],
     });
 
     if (result.rowsAffected === 0) return errorResponse(404);
