@@ -338,12 +338,13 @@ function FAQ() {
   const [open, setOpen] = useState<number | null>(0);
 
   const faqs = [
-    { q: "How long does setup take?", a: "About 5 minutes. Sign up, customize your form, and share the link. No technical skills needed." },
-    { q: "Can I try it before paying?", a: "Yes! We offer a 7-day free trial with full access to all features. No credit card required to start." },
-    { q: "Is my client data secure?", a: "Absolutely. We use AES-256 encryption, follow OWASP security standards, and are GDPR compliant. Your data is protected to enterprise standards." },
-    { q: "Can I cancel anytime?", a: "Yes. No contracts, no cancellation fees. Cancel your subscription at any time directly from your dashboard." },
-    { q: "Do you offer refunds?", a: "We offer a 30-day money-back guarantee. If you're not satisfied, contact us for a full refund — no questions asked." },
-    { q: "What kinds of businesses use ClientPulse?", a: "Plumbers, electricians, cleaners, consultants, contractors, therapists, tutors — any service business that takes client inquiries." },
+    { q: "I already have a contact form on my website. Why do I need this?", a: "A contact form collects information — that's it. When a lead comes in at 9 PM and you're off the clock, nothing happens until you remember to check. ClientPulse sends a branded, professional response within seconds, then follows up automatically on Day 3 and Day 7. Most service businesses lose 3-5 leads a month to slow follow-up. ClientPulse makes sure that doesn't happen." },
+    { q: "How does this work with my existing website?", a: "You get a unique link to your branded intake form. You can add it as a button on your website, share it on social media, text it to prospects, or include it in your Google Business profile. It works on any device — no coding or IT help required. Takes about 5 minutes from signup to going live." },
+    { q: "What happens to my client data? Is it secure?", a: "Every piece of client information is encrypted with AES-256 — the same standard used by banks and government agencies. We follow OWASP security standards, apply strict access controls, and are fully GDPR compliant. Your clients' data is never shared, sold, or used for anything other than powering your follow-ups." },
+    { q: "What if I want to customize the follow-up emails?", a: "Your follow-up emails are sent under your business name, with your brand colors, and from your reply-to address. When a client receives a follow-up, it looks like it came directly from you — not from a third-party tool. Pro plan users can create unlimited custom sequences tailored to different services." },
+    { q: "How much does it cost, and is there a contract?", a: "Plans start at $39/month with a 7-day free trial — no credit card required to start. There are no contracts, no setup fees, and no per-lead charges. You can cancel anytime from your dashboard. If you're not satisfied within 30 days, we'll refund you in full, no questions asked." },
+    { q: "Will this actually help me get more clients?", a: "Research shows that responding to a lead within 5 minutes makes you 21 times more likely to close the deal. Most service businesses take hours or days to respond. ClientPulse responds for you in seconds and keeps following up so leads don't go cold. If you're losing even one job a month to slow follow-up, ClientPulse pays for itself many times over." },
+    { q: "I'm not tech-savvy. Can I still use this?", a: "ClientPulse was built specifically for business owners who don't have time to learn complicated software. Setup takes 5 minutes: enter your business name, pick your brand color, and share your link. That's it. There's no CRM to configure, no integrations to set up, and no training required." },
   ];
 
   return (
