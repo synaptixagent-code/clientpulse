@@ -99,6 +99,12 @@ export async function GET(req: NextRequest) {
       }
     });
 
+    const brandingResult = await db.execute({
+      sql: 'SELECT company_name FROM branding WHERE user_id = ?',
+      args: [session.userId],
+    });
+    const brandingConfigured = !!brandingResult.rows[0];
+
     auditLog({ userId: session.userId, action: 'view_submissions', ip });
 
     return NextResponse.json({
@@ -109,6 +115,7 @@ export async function GET(req: NextRequest) {
         used: totalCount,
         intakeUrl,
       },
+      brandingConfigured,
     });
   } catch {
     return errorResponse(500);

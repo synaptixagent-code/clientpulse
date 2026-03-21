@@ -35,6 +35,7 @@ interface PlanInfo {
 export default function AdminDashboard() {
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [plan, setPlan] = useState<PlanInfo | null>(null);
+  const [brandingConfigured, setBrandingConfigured] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [expanded, setExpanded] = useState<string | null>(null);
@@ -55,6 +56,7 @@ export default function AdminDashboard() {
         if (data) {
           setSubmissions(data.submissions);
           setPlan(data.plan ?? null);
+          setBrandingConfigured(data.brandingConfigured ?? false);
         }
       })
       .catch(() => setError("Failed to load submissions"))
@@ -136,8 +138,40 @@ export default function AdminDashboard() {
           <p className="text-slate-400 text-sm">Manage your client submissions and follow-ups.</p>
         </div>
 
+        {/* Onboarding Checklist */}
+        {plan && (!brandingConfigured || submissions.length === 0) && (
+          <div className="bg-gradient-to-r from-blue-600/20 to-violet-600/20 rounded-2xl border border-blue-500/30 p-6 mb-6">
+            <h2 className="text-lg font-bold text-white mb-1">Get started with ClientPulse</h2>
+            <p className="text-sm text-slate-400 mb-5">Complete these steps to start capturing leads.</p>
+            <div className="space-y-3">
+              <OnboardingStep
+                done={true}
+                label="Create your account"
+                description="You're in! Your account is ready to go."
+              />
+              <OnboardingStep
+                done={brandingConfigured}
+                label="Set up your branding"
+                description="Add your company name and colors so your forms look professional."
+                action={!brandingConfigured ? { label: "Set up branding", href: "/admin/settings" } : undefined}
+              />
+              <OnboardingStep
+                done={false}
+                label="Share your intake form"
+                description="Copy your unique link and add it to your website or share it with clients."
+                action={{ label: copied ? "Copied!" : "Copy intake link", onClick: copyIntakeUrl }}
+              />
+              <OnboardingStep
+                done={submissions.length > 0}
+                label="Get your first lead"
+                description={submissions.length > 0 ? `You have ${submissions.length} lead${submissions.length > 1 ? "s" : ""}!` : "Once you share your link, leads will appear here automatically."}
+              />
+            </div>
+          </div>
+        )}
+
         {/* Intake URL Banner */}
-        {plan && (
+        {plan && (brandingConfigured && submissions.length > 0) && (
           <div className="bg-slate-800/50 rounded-2xl border border-slate-700 p-5 mb-6 flex flex-col sm:flex-row sm:items-center gap-4">
             <div className="flex-1 min-w-0">
               <p className="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-1.5">Your Client Intake Form</p>
@@ -306,6 +340,42 @@ export default function AdminDashboard() {
           </div>
         )}
       </main>
+    </div>
+  );
+}
+
+function OnboardingStep({ done, label, description, action }: {
+  done: boolean;
+  label: string;
+  description: string;
+  action?: { label: string; href?: string; onClick?: () => void };
+}) {
+  return (
+    <div className={`flex items-start gap-3 p-3 rounded-xl transition ${done ? "bg-white/5" : "bg-white/10"}`}>
+      <div className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 mt-0.5 ${done ? "bg-emerald-500" : "bg-slate-600"}`}>
+        {done ? (
+          <svg className="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+          </svg>
+        ) : (
+          <span className="w-2 h-2 rounded-full bg-slate-400" />
+        )}
+      </div>
+      <div className="flex-1 min-w-0">
+        <p className={`text-sm font-semibold ${done ? "text-slate-400 line-through" : "text-white"}`}>{label}</p>
+        <p className="text-xs text-slate-500 mt-0.5">{description}</p>
+      </div>
+      {action && !done && (
+        action.href ? (
+          <a href={action.href} className="shrink-0 text-xs bg-blue-600 hover:bg-blue-500 text-white px-3 py-1.5 rounded-lg font-medium transition">
+            {action.label}
+          </a>
+        ) : (
+          <button onClick={action.onClick} className="shrink-0 text-xs bg-blue-600 hover:bg-blue-500 text-white px-3 py-1.5 rounded-lg font-medium transition">
+            {action.label}
+          </button>
+        )
+      )}
     </div>
   );
 }
